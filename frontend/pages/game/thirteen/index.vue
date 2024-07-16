@@ -53,21 +53,22 @@
 
       <div class="divide-y divide-gray-200">
         <NuxtLink
-          to="/game/thirteen/123"
           class="flex items-center justify-between px-0 py-3 transition-all border-b hover:border-neutral-500 cursor-pointer"
+          v-for="room in rooms"
+          :to="`/game/thirteen/${room.id}`"
         >
           <div class="flex items-center gap-x-3">
-            <div>#110</div>
+            <div>#{{ room.id }}</div>
             <div>
               <h6
                 class="block font-sans text-base font-semibold leading-relaxed tracking-normal text-blue-gray-900 antialiased"
               >
-                Người chơi: Tieng, Test, Moy
+                Người chơi: {{ room.players.join(", ") }}
               </h6>
               <p
                 class="block font-sans text-sm font-light leading-normal text-gray-700 antialiased"
               >
-                Đã mở bàn 30 phút trước
+                Đã mở bàn {{ calcMinusTime(room.createdAt) }}
               </p>
             </div>
           </div>
@@ -78,27 +79,63 @@
             Vào chơi
           </a>
         </NuxtLink>
+
+        <!-- Case room empty -->
+        <!-- Show message and button create new -->
+        <div
+          v-if="rooms.length === 0"
+          class="flex flex-col items-center justify-center py-8"
+        >
+          <p
+            class="block font-sans text-base font-semibold leading-relaxed tracking-normal text-blue-gray-900 antialiased"
+          >
+            Hiện không có phòng nào
+          </p>
+          <button
+            @click="createRoom"
+            class="block font-sans text-sm font-bold leading-normal px-4 py-2 rounded-sm transition-all text-blue-500 antialiased hover:bg-blue-500 hover:text-white"
+          >
+            Mở bàn mới
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import type { Socket } from "socket.io-client";
 import { SOCKET_EVENTS } from "~/constants";
-const { $socket } = useNuxtApp();
+import calcMinusTime from "~/utils/calc-minus-time";
+const { $socket, $router } = useNuxtApp();
 const isCreatingRoom = ref(false);
+interface Room {
+  id: string;
+  players: string[];
+  createdAt: string;
+}
+const rooms = ref<Room[]>([]);
 
 function createRoom() {
   if (isCreatingRoom.value) return;
   isCreatingRoom.value = true;
-  $socket.emit(SOCKET_EVENTS.GAME.CREATE, {
+  ($socket as Socket).emit(SOCKET_EVENTS.GAME.CREATE, {
     type: "thirteen",
   });
 }
+($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.REGISTER_LIST);
+($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.LIST, (list: Room[]) => {
+  rooms.value = list;
+});
+($socket as Socket).on(
+  SOCKET_EVENTS.GAME.CREATED,
+  (payload: { roomId: string; type: string }) => {
+    isCreatingRoom.value = false;
+    $router.push(`/game/${payload.type}/${payload.roomId}`);
+  }
+);
 
-// on GAME CREATED
-$socket.on(SOCKET_EVENTS.GAME.CREATED, (roomId: string) => {
-  isCreatingRoom.value = false;
-  console.log("GAME CREATED", roomId);
+onUnmounted(() => {
+  ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.UNREGISTER_LIST);
 });
 
 definePageMeta({

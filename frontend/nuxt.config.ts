@@ -12,6 +12,12 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  modules: [
+    '@pinia/nuxt',
+  ],
+  pinia: {
+    autoImports: ['defineStore'],
+  },
   runtimeConfig: {
     public: {
       NUXT_API: process.env.NUXT_API,
