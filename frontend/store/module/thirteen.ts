@@ -1,19 +1,28 @@
 import { defineStore } from "pinia";
+import type { CardSuit, CardValue } from "~/constants";
 export type Status = "waiting" | "playing" | "finished";
-
+export type UserStatus = 'ready' | 'unready'
+export type ThirteenCard = {
+  suit: CardSuit,
+  value: CardValue,
+  weight: number
+}
 export type Player = {
   id: string;
   index: number;
   name: string;
-  cards: string[];
-  status: Status;
+  cards: ThirteenCard[];
+  status: UserStatus;
+  score: number;
 };
 export type PlayerList = Record<string, Player>;
 export type GameData = {
   id: string;
   players: PlayerList;
   host: string;
-  status: "waiting" | "playing" | "finished";
+  status: Status;
+  me?: Player;
+  gameStartAt?: Date;
 };
 export const useThirteenStore = defineStore("thirteen", {
   state: (): GameData => ({
@@ -21,6 +30,8 @@ export const useThirteenStore = defineStore("thirteen", {
     players: {},
     status: "waiting" as Status,
     host: "",
+    me: undefined,
+    gameStartAt: undefined,
   }),
   actions: {
     setIdRoom(id: string) {
@@ -35,6 +46,12 @@ export const useThirteenStore = defineStore("thirteen", {
     setHost(host: string) {
       this.host = host;
     },
+    setMe(me?: Player) {
+      this.me = me;
+    },
+    setGameStartAt(gameStartAt?: Date) {
+      this.gameStartAt = gameStartAt
+    }
   },
   getters: {
     getId(): string {
@@ -49,5 +66,11 @@ export const useThirteenStore = defineStore("thirteen", {
     getHost(): string {
       return this.host;
     },
+    getMe(): Player | undefined {
+      return this.me;
+    },
+    getGameStartAt() : Date | undefined {
+      return this.gameStartAt;
+    }
   },
 });

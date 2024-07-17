@@ -2,9 +2,14 @@ import { Server, Socket } from 'socket.io';
 import { SOCKET_EVENTS } from '../events';
 import generateRedisKey from '../../utils/generate-redis-ket';
 import redisClient from '../../configs/redisClient';
-import { ThirteenGame } from '../../types/game.type';
+import { ThirteenGame, UserStatus } from '../../types/game.type';
+import getCardThirteen, { ThirteenCard } from '../../utils/get-card-thirteen';
+import shuffleArray from '../../utils/shuffle-array';
+import { suitOrder } from '../../constants/cards';
 
 const handleThirteenGame = (socket: Socket, io: Server) => {
+    const timers: Record<string, NodeJS.Timeout> = {}
+    const TIME_PREPARE_START_GAME = 5
     socket.on('disconnect', async () => {
         // Get list of room
         const redisKey = generateRedisKey('thirteen')
@@ -26,9 +31,13 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             });
             if (haveUser) {
                 delete room.players[oldPosition];
+                room.gameStartAt = undefined
                 socket.leave(redisRoomDetailKey);
                 await redisClient.set(redisRoomDetailKey, JSON.stringify(room));
-                io.to(redisRoomDetailKey).emit(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER, room.players);
+                io.to(redisRoomDetailKey).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
+                    players: room.players,
+                    gameStartAt: room.gameStartAt
+                });
                 let result = await getThirteenList()
                 io.to('thirteen-register-list').emit(SOCKET_EVENTS.GAME.THIRTEEN.LIST, result);
             }
@@ -51,6 +60,37 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
     socket.on(SOCKET_EVENTS.GAME.THIRTEEN.UNREGISTER_LIST, async () => {
         socket.leave('thirteen-register-list');
+    })
+
+    socket.on(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS, async ({
+        roomId,
+    }: {roomId: string}) => {
+        const redisKeys = generateRedisKey('thirteen', roomId);
+        const roomInfo = await redisClient.get(redisKeys.detail);
+        const room: ThirteenGame = JSON.parse(roomInfo || '{}');
+        let isAllReady = true
+        Object.keys(room.players).forEach(key => {
+            if (room.players[key]?.id == socket.id) {
+                room.players[key].status = room.players[key].status == 'ready' ? 'unready' : 'ready'
+            }
+            if(room.players[key].status == 'unready') isAllReady = false
+        });
+        // If all players ready => start game in 5 seconds
+        if(isAllReady) {
+            const time = new Date();
+            time.setSeconds(time.getSeconds() + TIME_PREPARE_START_GAME);
+            room.gameStartAt = time
+            timers[redisKeys.detail] = setTimeout(()=> {
+                startGame(roomId)
+            }, TIME_PREPARE_START_GAME * 1000)
+        } else {
+            room.gameStartAt = undefined;
+        }
+        await redisClient.set(redisKeys.detail, JSON.stringify(room));
+        io.to(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
+            players: room.players,
+            gameStartAt: room.gameStartAt
+        });
     })
 
     socket.on(SOCKET_EVENTS.GAME.THIRTEEN.JOIN, async (payload: {id: string}) => {
@@ -87,11 +127,15 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                 index: Number(position),
                 cards: [],
                 score: 0,
-                status: 'waiting',
+                status: 'unready',
             };
+            room.gameStartAt = undefined;
         }
         await redisClient.set(redisKeys.detail, JSON.stringify(room));
-        io.to(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER, room.players);
+        io.to(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
+            players: room.players,
+            gameStartAt: room.gameStartAt
+        });
         let result = await getThirteenList()
         io.to('thirteen-register-list').emit(SOCKET_EVENTS.GAME.THIRTEEN.LIST, result);
     })
@@ -107,11 +151,46 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             }
         });
         await redisClient.set(redisKeys.detail, JSON.stringify(room));
-        io.to(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER, room.players);
+        io.to(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
+            players: room.players
+        });
         let result = await getThirteenList()
         io.to('thirteen-register-list').emit(SOCKET_EVENTS.GAME.THIRTEEN.LIST, result);
     })
 
+
+    async function startGame(roomId: string) {
+        const redisKeys = generateRedisKey('thirteen', roomId);
+        const cards = shuffleArray(getCardThirteen())
+        const roomInfo = await redisClient.get(redisKeys.detail);
+        const room: ThirteenGame = JSON.parse(roomInfo || '{}');
+        Object.keys(room.players).forEach(key => {
+            if(room.players[key]) {
+                let myCards = cards.splice(-13, 13);
+                myCards = myCards.sort((a, b) => {
+                    const valueDifference = a.weight - b.weight;
+                    if (valueDifference !== 0) {
+                        return valueDifference;
+                    }
+                    return suitOrder[a.suit] - suitOrder[b.suit];
+                });
+                room.players[key].cards = myCards;
+            }
+        });
+
+        // Check have anyone win
+
+        // 
+
+        room.gameStartAt = undefined
+        room.status = 'playing'
+        await redisClient.set(redisKeys.detail, JSON.stringify(room));
+        io.to(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
+            players: room.players,
+            gameStartAt: room.gameStartAt,
+            status: room.status
+        });
+    }
 
 };
 

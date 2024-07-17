@@ -8,7 +8,9 @@
           :class="{ 'border-b border-dashed border-neutral-500': isChangeName }"
           >{{ player.name }}</span
         >
-        <div v-if="player.id == ($socket as Socket).id">
+        <div
+          v-if="player.id == ($socket as Socket).id && thirteenStore.getStatus == 'waiting'"
+        >
           <UserRoundPenIcon
             :size="16"
             class="cursor-pointer hover:opacity-80 transition-all"
@@ -27,17 +29,16 @@
           </SaveIcon>
         </div>
       </div>
+      <div v-if="thirteenStore.getStatus == 'waiting'">
+        <span v-if="player.status == 'ready'" class="text-[10px] block text-green-500"
+          >Đã sẵn sàn</span
+        >
+        <span v-else class="text-[10px] block text-red-500">Chưa sẵn sàn</span>
+      </div>
+
       <span class="text-xs">( {{ player.score }} điểm)</span>
       <br />
     </div>
-  </div>
-  <div class="relative w-fit" v-if="player.cards.length > 0">
-    <img src="/images/card/after.png" alt="" class="max-w-16 object-cover" />
-    <span
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center w-6 h-6 text-sm bg-white/70 rounded-full font-semibold"
-    >
-      {{ player.cards.length }}</span
-    >
   </div>
 </template>
 
