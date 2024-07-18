@@ -1,4 +1,4 @@
-import { GameType } from "../../types/game.type";
+import { GameType } from "../../types/game.thirteen.type";
 
 // Export type create 
 export type CreateGame = {

@@ -52,34 +52,7 @@
       </form>
 
       <div class="divide-y divide-gray-200">
-        <NuxtLink
-          class="flex items-center justify-between px-0 py-3 transition-all border-b hover:border-neutral-500 cursor-pointer"
-          v-for="room in rooms"
-          :to="`/game/thirteen/${room.id}`"
-        >
-          <div class="flex items-center gap-x-3">
-            <div>#{{ room.id }}</div>
-            <div>
-              <h6
-                class="block font-sans text-base font-semibold leading-relaxed tracking-normal text-blue-gray-900 antialiased"
-              >
-                Người chơi: {{ room.players.join(", ") }}
-              </h6>
-              <p
-                class="block font-sans text-sm font-light leading-normal text-gray-700 antialiased"
-              >
-                Đã mở bàn {{ calcMinusTime(room.createdAt) }}
-              </p>
-            </div>
-          </div>
-          <a
-            href="#"
-            class="block font-sans text-sm font-bold leading-normal px-4 py-2 rounded-sm transition-all text-blue-500 antialiased hover:bg-blue-500 hover:text-white"
-          >
-            Vào chơi
-          </a>
-        </NuxtLink>
-
+        <SpecThirteenListItem v-for="room in rooms" :room="room" />
         <!-- Case room empty -->
         <!-- Show message and button create new -->
         <div
@@ -105,7 +78,6 @@
 <script setup lang="ts">
 import type { Socket } from "socket.io-client";
 import { SOCKET_EVENTS } from "~/constants";
-import calcMinusTime from "~/utils/calc-minus-time";
 const { $socket, $router } = useNuxtApp();
 const isCreatingRoom = ref(false);
 interface Room {
@@ -124,7 +96,7 @@ function createRoom() {
 }
 ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.REGISTER_LIST);
 ($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.LIST, (list: Room[]) => {
-  rooms.value = list;
+  rooms.value = list.filter((room) => room.id);
 });
 ($socket as Socket).on(
   SOCKET_EVENTS.GAME.CREATED,
@@ -136,6 +108,8 @@ function createRoom() {
 
 onUnmounted(() => {
   ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.UNREGISTER_LIST);
+  ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.LIST);
+  ($socket as Socket).off(SOCKET_EVENTS.GAME.CREATED);
 });
 
 definePageMeta({

@@ -4,7 +4,7 @@ import { CreateGame } from './types/create-game.type';
 import handleThirteenGame, { getThirteenList } from './game/thirteen';
 import redisClient from '../configs/redisClient';
 import generateRedisKey from '../utils/generate-redis-ket';
-import { ThirteenGame } from '../types/game.type';
+import { ThirteenGame } from '../types/game.thirteen.type';
 const socketHandler = (io: Server) => {
   io.on('connection', (socket) => {
 
@@ -25,7 +25,7 @@ const socketHandler = (io: Server) => {
         case 'thirteen':
           const room: ThirteenGame = {
             id: roomId.toString(),
-            players: {},
+            players: [],
             host: socket.id,
             status: 'waiting',
             createdAt: new Date()

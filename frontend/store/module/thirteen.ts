@@ -9,35 +9,41 @@ export type ThirteenCard = {
 }
 export type Player = {
   id: string;
-  index: number;
   name: string;
   cards: ThirteenCard[];
   status: UserStatus;
   score: number;
+  position: number;
 };
-export type PlayerList = Record<string, Player>;
+export type MePlayer = Omit<Player, "cards"> & {
+  cards: (ThirteenCard & {
+    isSelected?: boolean
+  })[]
+}
 export type GameData = {
   id: string;
-  players: PlayerList;
+  players: Player[];
   host: string;
   status: Status;
-  me?: Player;
-  gameStartAt?: Date;
+  me?: MePlayer;
+  gameStartAt?: string;
+  turn?: string;
 };
 export const useThirteenStore = defineStore("thirteen", {
   state: (): GameData => ({
     id: "",
-    players: {},
+    players: [],
     status: "waiting" as Status,
     host: "",
     me: undefined,
     gameStartAt: undefined,
+    turn: undefined,
   }),
   actions: {
     setIdRoom(id: string) {
       this.id = id;
     },
-    setPlayers(players: PlayerList) {
+    setPlayers(players: Player[]) {
       this.players = players;
     },
     setStatus(status: Status) {
@@ -46,18 +52,41 @@ export const useThirteenStore = defineStore("thirteen", {
     setHost(host: string) {
       this.host = host;
     },
-    setMe(me?: Player) {
+    setMe(me?: MePlayer) {
       this.me = me;
     },
-    setGameStartAt(gameStartAt?: Date) {
+    setTurn(turn?: string) {
+      this.turn = turn;
+    },
+    setGameStartAt(gameStartAt?: string) {
       this.gameStartAt = gameStartAt
+    },
+    getPlayer(id: string): Player | undefined {
+      return this.players.find((player) => player.id === id);
+    },
+    getPlayerIndex(id: string) : number {
+      return this.players.findIndex((player) => player.id === id);
+    },
+    setPlayerStatus(id: string, status: UserStatus) {
+      const playerIndex = this.getPlayerIndex(id);
+      if(playerIndex === -1) return;
+      this.players[playerIndex].status = status;
+    },
+    setCardUser(id: string, cards?: ThirteenCard[]) {
+      const playerIndex = this.getPlayerIndex(id);
+      if(playerIndex === -1) return;
+      this.players[playerIndex].cards = cards || [];
+    },
+    toggleCardSelected(cardIndex: number) {
+      if(!this.me) return;
+      this.me.cards[cardIndex].isSelected = !this.me.cards[cardIndex].isSelected;
     }
   },
   getters: {
     getId(): string {
       return this.id;
     },
-    getPlayers(): PlayerList {
+    getPlayers(): Player[] {
       return this.players;
     },
     getStatus(): Status {
@@ -66,11 +95,14 @@ export const useThirteenStore = defineStore("thirteen", {
     getHost(): string {
       return this.host;
     },
-    getMe(): Player | undefined {
+    getMe(): MePlayer | undefined {
       return this.me;
     },
-    getGameStartAt() : Date | undefined {
+    getGameStartAt() : string | undefined {
       return this.gameStartAt;
-    }
+    },
+    getTurn() : string | undefined {
+      return this.turn;
+    },
   },
 });

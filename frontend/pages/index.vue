@@ -5,7 +5,7 @@
       <NuxtLink
         v-for="game in GAMES"
         :to="game.link"
-        :key="game.id"
+        :key="game.name"
         class="relative flex flex-col transition-all text-gray-700 border border-neutral-100 bg-white hover:shadow-md bg-clip-border rounded-xl p-3"
       >
         <img
@@ -16,7 +16,7 @@
         <div class="mt-6">
           <h2 class="text-lg font-semibold">{{ game.name }}</h2>
           <p class="text-sm text-gray-500">{{ game.description }}</p>
-          <p class="text-xs text-gray-500">100 người đang chơi</p>
+          <p class="text-xs text-gray-500">3 người đang chơi</p>
         </div>
       </NuxtLink>
     </div>

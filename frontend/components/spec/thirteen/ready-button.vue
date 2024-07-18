@@ -13,13 +13,15 @@
 import { debounce } from "lodash";
 import type { Socket } from "socket.io-client";
 import { SOCKET_EVENTS } from "~/constants";
-import { useThirteenStore } from "~/store/module/thirteen";
+import { useThirteenStore, type UserStatus } from "~/store/module/thirteen";
 
 const thirteenStore = useThirteenStore();
 const { $socket } = useNuxtApp();
 const toggleReady = debounce(() => {
+  const status: UserStatus = thirteenStore.getMe?.status == "unready" ? 'ready' : 'unready';
   ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS, {
     roomId: thirteenStore.getId,
+    status: status,
   });
 }, 300);
 </script>

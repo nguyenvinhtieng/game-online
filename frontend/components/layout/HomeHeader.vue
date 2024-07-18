@@ -7,7 +7,7 @@
         </nuxt-link>
         <div v-if="headerItems.length > 0">
           <ul class="flex gap-2">
-            <li v-for="item in headerItems" :key="item.id">
+            <li v-for="item in headerItems" :key="item.link">
               <nuxt-link
                 :to="item.link"
                 :class="

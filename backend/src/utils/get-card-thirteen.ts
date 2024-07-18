@@ -1,5 +1,10 @@
 import CARDS, { Card, CardValue } from "../constants/cards";
 export type ThirteenCard = Card & {weight: number}
+export const sampleThirteenCard: ThirteenCard = {
+    suit: 'hearts',
+    value: '3',
+    weight: 3
+}
 const valueMapWeight: Record<CardValue, number> = {
     "3": 3,
     "4": 4,
