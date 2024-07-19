@@ -13,7 +13,7 @@
         >
           <ArrowLeft class="w-6 h-6" />
         </button>
-        <img src="/images/game-thumbnail/thirteen.png" alt="logo" class="w-14 h-14" />
+        <img src="/images/game-thumbnail/thirteen.svg" alt="logo" class="w-14 h-14" />
         <p class="font-semibold">MEOW LÊN</p>
       </div>
       <!-- Search -->

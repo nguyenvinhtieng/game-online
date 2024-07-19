@@ -24,10 +24,11 @@ export type ThirteenGame = {
     status: Status;
     turn?: string;
     gameStartAt?: Date;
+    turnTimeout?: Date;
     createdAt: Date;
-    prevTurn?: {
+    prevTurn: {
         id: string;
         cards: ThirteenCard[];
-    },
+    }[],
     settings: SettingThirteenGame
 }

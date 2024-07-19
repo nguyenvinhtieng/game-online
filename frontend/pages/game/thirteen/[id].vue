@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-dvh relative flex flex-col py-5 gap-5">
     <header
-      class="flex w-full gap-3 justify-start md:justify-center items-center flex-wrap md:flex-nowrap"
+      class="flex w-full gap-3 justify-start md:justify-center items-center flex-nowrap"
     >
       <div
         class="flex md:justify-center justify-start items-center gap-3 w-full md:w-fit"
@@ -17,16 +17,20 @@
           color="primary"
           shape="square"
           size="md"
-          @click="() => copyToClipboard('123')"
+          @click="() => copyToClipboard(thirteenStore.getId)"
         >
           <template v-slot:child>
-            <span class="font-normal">ID Phòng: <strong class="ml-2">#123</strong></span>
+            <span class="font-normal"
+              >ID Phòng: <strong class="ml-2">#{{ thirteenStore.getId }}</strong></span
+            >
           </template>
         </BaseButton>
       </div>
       <div class="flex-1 flex items-center justify-end gap-3">
-        <p>Điểm thắng:</p>
-        <p class="text-primary text-2xl font-extrabold">500</p>
+        <p class="whitespace-nowrap">Điểm thắng:</p>
+        <p class="text-primary text-2xl font-extrabold">
+          {{ thirteenStore.getSettings?.winScore || 0 }}
+        </p>
       </div>
     </header>
 
@@ -63,6 +67,14 @@
           class="flex-1 relative bg-primary-900 rounded-[100px] h-full border-[20px] border-primary-800"
         >
           <SpecThirteenReadyButton />
+          <SpecThirteenPositionNumber
+            :positions="sortedPlayers.map((i) => i.position)"
+            v-if="thirteenStore.getStatus == 'waiting'"
+          />
+          <SpecThirteenCards
+            v-if="thirteenStore.getStatus != 'waiting'"
+            :players="sortedPlayers.map((i) => i.player)"
+          />
         </div>
         <div
           :class="`flex justify-center ${
@@ -92,30 +104,6 @@
         />
       </div>
     </div>
-    <!-- <div
-      v-for="(data, index) in sortedPlayers"
-      :key="index"
-      :class="positionClass[index]"
-    >
-      <SpecThirteenWaitingUser v-if="thirteenStore.getStatus == 'waiting'" :data="data" />
-      <SpecThirteenPlayingUser
-        v-if="thirteenStore.getStatus == 'playing'"
-        :player="data.player"
-        :wrapperClass="wrapperClass[index]"
-      />
-    </div>
-
-    <div
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-      v-if="thirteenStore.getStatus == 'waiting'"
-    >
-      <SpecThirteenReadyButton />
-      <SpecThirteenCountDownStart v-if="thirteenStore.getGameStartAt" />
-    </div>
-
-    <div class="absolute top-1 right-1 text-lg font-semibold" v-if="thirteenStore.me">
-      Điểm của tôi: {{ thirteenStore.me?.score || 0 }} điểm
-    </div> -->
   </div>
 </template>
 <script setup lang="ts">
@@ -140,13 +128,16 @@ const thirteenStore = useThirteenStore();
 ($socket as Socket).on(
   SOCKET_EVENTS.GAME.THIRTEEN.DATA,
   (payload: GameData & { notValidRoom: string }) => {
+    console.log("DATA::", payload);
     if (payload.hasOwnProperty('notValidRoom')) $router.push('/');
     if (payload.hasOwnProperty('id')) thirteenStore.setIdRoom(payload.id);
     if (payload.hasOwnProperty('host')) thirteenStore.setHost(payload.host);
     if (payload.hasOwnProperty('status')) thirteenStore.setStatus(payload.status);
     if (payload.hasOwnProperty('gameStartAt')) thirteenStore.setGameStartAt(payload.gameStartAt)
+    if (payload.hasOwnProperty('turnTimeout')) thirteenStore.setTurnTimeout(payload.turnTimeout)
     if (payload.hasOwnProperty('turn')) thirteenStore.setTurn(payload.turn)
     if (payload.hasOwnProperty('settings')) thirteenStore.setSettings(payload.settings)
+    if (payload.hasOwnProperty('prevTurn')) thirteenStore.setPrevTurn(payload.prevTurn)
     if (payload.hasOwnProperty('players')) {
       thirteenStore.setPlayers(payload.players)
       let me = payload.players.find(player => player.id == ($socket as Socket).id)
@@ -220,6 +211,17 @@ const wrapperClass = [
   "flex gap-1 flex-col-reverse justify-center items-center", //Bottom
   "flex gap-1 flex-row-reverse justify-center items-center", //Left
 ]
+
+// ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.DATA)
+// ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS)
+// ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD)
+
+// unmount off event
+// onUnmounted(() => {
+//   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.DATA)
+//   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS)
+//   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD)
+// })
 
 definePageMeta({
   layout: "game",

@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center justify-center flex-col gap-10 h-lvh">
-    <img src="/images/game-thumbnail/thirteen.png" alt="Meow Game" class="w-80" />
+    <img src="/images/game-thumbnail/thirteen.svg" alt="Meow Game" class="w-80" />
     <BaseButton
       variant="outline"
       color="primary"

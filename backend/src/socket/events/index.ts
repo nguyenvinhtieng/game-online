@@ -19,6 +19,7 @@ export const SOCKET_EVENTS = {
             UPDATE_GAME_START_AT: 'GAME:THIRTEEN:UPDATE_GAME_START_AT',
             UPDATE_CARD: 'GAME:THIRTEEN:UPDATE_CARD',
             POST_CARD: 'GAME:THIRTEEN:POST_CARD',
+            SKIP_TURN: 'GAME:THIRTEEN:SKIP_TURN',
         }
     },
     

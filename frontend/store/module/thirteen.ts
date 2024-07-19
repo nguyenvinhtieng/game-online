@@ -35,8 +35,13 @@ export type GameData = {
   status: Status;
   me?: MePlayer;
   gameStartAt?: string;
+  turnTimeout?: string;
   turn?: string;
-  settings?: SettingThirteenGame
+  settings?: SettingThirteenGame,
+  prevTurn: {
+    id: string;
+    cards: ThirteenCard[];
+  }[]
 };
 export const useThirteenStore = defineStore("thirteen", {
   state: (): GameData => ({
@@ -46,8 +51,10 @@ export const useThirteenStore = defineStore("thirteen", {
     host: "",
     me: undefined,
     gameStartAt: undefined,
+    turnTimeout: undefined,
     turn: undefined,
     settings: undefined,
+    prevTurn: []
   }),
   actions: {
     setIdRoom(id: string) {
@@ -71,11 +78,17 @@ export const useThirteenStore = defineStore("thirteen", {
     setGameStartAt(gameStartAt?: string) {
       this.gameStartAt = gameStartAt
     },
+    setTurnTimeout(turnTimeout?: string) {
+      this.turnTimeout = turnTimeout
+    },
     setSettings(settings?: SettingThirteenGame) {
       this.settings = settings;
     },
     getPlayer(id: string): Player | undefined {
       return this.players.find((player) => player.id === id);
+    },
+    setPrevTurn(turns: {id: string, cards: ThirteenCard[]}[]) {
+      this.prevTurn = turns;
     },
     getPlayerIndex(id: string) : number {
       return this.players.findIndex((player) => player.id === id);
@@ -93,7 +106,8 @@ export const useThirteenStore = defineStore("thirteen", {
     toggleCardSelected(cardIndex: number) {
       if(!this.me) return;
       this.me.cards[cardIndex].isSelected = !this.me.cards[cardIndex].isSelected;
-    }
+      console.log(this.me.cards)
+    },
   },
   getters: {
     getId(): string {
@@ -114,11 +128,20 @@ export const useThirteenStore = defineStore("thirteen", {
     getGameStartAt() : string | undefined {
       return this.gameStartAt;
     },
+    getTurnTimeout() : string | undefined {
+      return this.turnTimeout;
+    },
     getTurn() : string | undefined {
       return this.turn;
     },
     getSettings() : SettingThirteenGame | undefined {
       return this.settings;
+    },
+    getPrevTurn() : {id: string, cards: ThirteenCard[]}[] {
+      return this.prevTurn;
+    },
+    getLatestTurn() : {id: string, cards: ThirteenCard[]} | undefined {
+      return this.prevTurn[this.prevTurn.length - 1];
     }
   },
 });

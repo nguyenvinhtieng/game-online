@@ -26,7 +26,7 @@ import { cva } from "class-variance-authority";
 const props = defineProps<{
   variant?: "default" | "ghost" | "outline";
   size?: "sm" | "md" | "lg";
-  color?: "primary" | "secondary";
+  color?: "primary" | "secondary" | "white";
   shape?: "default" | "square";
   className?: string;
   startIcon?: string;
@@ -46,6 +46,7 @@ const buttonVariants = cva(
           "text-neutral-600 bg-neutral-100 md:hover:bg-neutral-200 md:active:bg-neutral-300",
         primary: "text-white bg-primary md:hover:bg-primary-600 md:active:bg-primary-700",
         secondary: "text-white bg-blue-500 md:hover:bg-blue-600 md:active:bg-blue-700",
+        white: "text-primary bg-white md:hover:bg-neutral-100 md:active:bg-neutral-200",
       },
       size: {
         ss: "py-1 px-2",

@@ -54,7 +54,6 @@ const props = defineProps<{
   direction?: "vertical" | "horizontal";
   player: Player;
 }>();
-console.log({props});
 const { direction } = props;
 
 const userStore = useUserStore();
