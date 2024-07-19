@@ -10,7 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/google-fonts": "^3.2.0",
     "@pinia/nuxt": "^0.5.1",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "lodash": "^4.17.21",
     "lucide-vue-next": "^0.408.0",
     "nuxt": "^3.12.3",
@@ -21,7 +24,6 @@
     "vue": "latest",
     "webstomp-client": "^1.2.6"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "devDependencies": {
     "@types/lodash": "^4.17.7",
     "@types/socket.io-client": "^3.0.0",

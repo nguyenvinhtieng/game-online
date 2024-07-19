@@ -1,92 +1,83 @@
 <template>
-  <div class="mt-4">
-    <div class="">
-      <div class="mb-4 flex items-center justify-between">
-        <h5
-          class="block font-sans text-xl font-semibold leading-snug tracking-normal text-blue-gray-900 antialiased"
-        >
-          Danh sách các phòng chơi
-        </h5>
+  <div class="">
+    <!-- <SpecThirteenListItem v-for="room in rooms" :room="room" /> -->
+    <header
+      class="flex w-full gap-3 justify-start md:justify-center items-center py-5 flex-wrap md:flex-nowrap"
+    >
+      <div
+        class="flex md:justify-center justify-start items-center gap-3 w-full md:w-fit"
+      >
         <button
-          @click="createRoom"
-          class="block font-sans text-sm font-bold leading-normal px-4 py-2 rounded-sm transition-all text-blue-500 antialiased hover:bg-blue-500 hover:text-white"
+          class="w-12 h-12 rounded-full bg-[##FAFAFA] hover:bg-neutral-100 active:bg-neutral-100 transition-all flex items-center justify-center"
+          @click="back"
         >
-          Mở bàn mới
+          <ArrowLeft class="w-6 h-6" />
         </button>
+        <img src="/images/game-thumbnail/thirteen.png" alt="logo" class="w-14 h-14" />
+        <p class="font-semibold">MEOW LÊN</p>
       </div>
-
-      <form class="max-w-md mx-auto">
-        <label
-          for="default-search"
-          class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
-          >Tìm</label
-        >
-        <div class="relative">
-          <div
-            class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
-          >
-            <svg
-              class="w-4 h-4 text-gray-500 dark:text-gray-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 20"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-              />
-            </svg>
-          </div>
-          <input
-            type="search"
-            id="default-search"
-            class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="Tìm mã phòng"
-            required
-          />
-        </div>
+      <!-- Search -->
+      <form
+        action=""
+        class="flex-1 flex items-center justify-center gap-3 h-14 rounded-xl border border-[#E6E6E6] bg-transparent px-4"
+      >
+        <SearchIcon class="w-6 h-6 text-neutral-800" />
+        <input
+          type="text"
+          class="w-full h-full flex-1 outline-none"
+          placeholder="Tìm ID phòng"
+        />
       </form>
 
-      <div class="divide-y divide-gray-200">
-        <SpecThirteenListItem v-for="room in rooms" :room="room" />
-        <!-- Case room empty -->
-        <!-- Show message and button create new -->
-        <div
-          v-if="rooms.length === 0"
-          class="flex flex-col items-center justify-center py-8"
-        >
-          <p
-            class="block font-sans text-base font-semibold leading-relaxed tracking-normal text-blue-gray-900 antialiased"
-          >
-            Hiện không có phòng nào
-          </p>
-          <button
-            @click="createRoom"
-            class="block font-sans text-sm font-bold leading-normal px-4 py-2 rounded-sm transition-all text-blue-500 antialiased hover:bg-blue-500 hover:text-white"
-          >
-            Mở bàn mới
-          </button>
-        </div>
-      </div>
-    </div>
+      <BaseButton
+        variant="outline"
+        color="primary"
+        shape="square"
+        size="lg"
+        @click="createRoom"
+      >
+        <template v-slot:startIcon> <PlusIcon :size="24" /> </template>
+        <template v-slot:child> Tạo bàn mới </template>
+      </BaseButton>
+    </header>
+
+    <main>
+      <!-- Table -->
+      <table class="w-full mt-5">
+        <thead class="text-[#808080]">
+          <tr>
+            <th class="text-left">ID Phòng</th>
+            <th class="text-left">Số người</th>
+            <th class="text-left">Điểm thắng</th>
+            <th class="text-left">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <SpecThirteenListItem v-for="room in rooms" :room="room" />
+          <!-- Case empty -->
+          <tr v-if="!rooms.length">
+            <td class="py-5" colspan="4">
+              <p class="text-center text-[#808080]">Không có phòng nào</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
   </div>
 </template>
 <script setup lang="ts">
 import type { Socket } from "socket.io-client";
 import { SOCKET_EVENTS } from "~/constants";
+import { ArrowLeft, SearchIcon, PlusIcon } from "lucide-vue-next";
 const { $socket, $router } = useNuxtApp();
-const isCreatingRoom = ref(false);
-interface Room {
-  id: string;
-  players: string[];
-  createdAt: string;
-}
-const rooms = ref<Room[]>([]);
+import { type ThirteenGameRoomItem } from '~/store/module/thirteen'
 
+const isCreatingRoom = ref(false);
+
+const rooms = ref<ThirteenGameRoomItem[]>([]);
+function back() {
+  $router.back();
+}
 function createRoom() {
   if (isCreatingRoom.value) return;
   isCreatingRoom.value = true;
@@ -95,7 +86,7 @@ function createRoom() {
   });
 }
 ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.REGISTER_LIST);
-($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.LIST, (list: Room[]) => {
+($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.LIST, (list: ThirteenGameRoomItem[]) => {
   rooms.value = list.filter((room) => room.id);
 });
 ($socket as Socket).on(
@@ -113,7 +104,7 @@ onUnmounted(() => {
 });
 
 definePageMeta({
-  layout: "game",
+  layout: "home",
   scrollToTop: true,
 });
 </script>

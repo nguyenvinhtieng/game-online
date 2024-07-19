@@ -1,6 +1,98 @@
 <template>
-  <div class="w-full h-full relative">
-    <div
+  <div class="w-full h-dvh relative flex flex-col py-5 gap-5">
+    <header
+      class="flex w-full gap-3 justify-start md:justify-center items-center flex-wrap md:flex-nowrap"
+    >
+      <div
+        class="flex md:justify-center justify-start items-center gap-3 w-full md:w-fit"
+      >
+        <button
+          class="w-12 h-12 rounded-full bg-[##FAFAFA] hover:bg-neutral-100 active:bg-neutral-100 transition-all flex items-center justify-center"
+          @click="() => $router.back()"
+        >
+          <ArrowLeft class="w-6 h-6" />
+        </button>
+        <BaseButton
+          variant="default"
+          color="primary"
+          shape="square"
+          size="md"
+          @click="() => copyToClipboard('123')"
+        >
+          <template v-slot:child>
+            <span class="font-normal">ID Phòng: <strong class="ml-2">#123</strong></span>
+          </template>
+        </BaseButton>
+      </div>
+      <div class="flex-1 flex items-center justify-end gap-3">
+        <p>Điểm thắng:</p>
+        <p class="text-primary text-2xl font-extrabold">500</p>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-hidden relative flex flex-col gap-5">
+      <div class="flex justify-center">
+        <SpecThirteenPlayer
+          v-if="sortedPlayers[0].player"
+          :player="sortedPlayers[0].player"
+        />
+        <SpecThirteenAvailableChair
+          v-else-if="thirteenStore.getStatus == 'waiting'"
+          :position="sortedPlayers[0].position"
+        />
+      </div>
+      <div class="flex justify-center items-center flex-1 gap-5">
+        <div
+          :class="`flex justify-center ${
+            thirteenStore.getStatus != 'waiting' && sortedPlayers[3].player
+          } && 'w-20'`"
+        >
+          <SpecThirteenPlayer
+            v-if="sortedPlayers[1].player"
+            :player="sortedPlayers[1].player"
+            direction="vertical"
+          />
+          <SpecThirteenAvailableChair
+            v-else-if="thirteenStore.getStatus == 'waiting'"
+            :position="sortedPlayers[1].position"
+            direction="vertical"
+          />
+        </div>
+        <!-- Board -->
+        <div
+          class="flex-1 relative bg-primary-900 rounded-[100px] h-full border-[20px] border-primary-800"
+        >
+          <SpecThirteenReadyButton />
+        </div>
+        <div
+          :class="`flex justify-center ${
+            thirteenStore.getStatus != 'waiting' && sortedPlayers[1].player
+          } && 'w-20'`"
+        >
+          <SpecThirteenPlayer
+            v-if="sortedPlayers[3].player"
+            :player="sortedPlayers[3].player"
+            direction="vertical"
+          />
+          <SpecThirteenAvailableChair
+            v-else-if="thirteenStore.getStatus == 'waiting'"
+            :position="sortedPlayers[3].position"
+            direction="vertical"
+          />
+        </div>
+      </div>
+      <div class="flex justify-center">
+        <SpecThirteenPlayer
+          v-if="sortedPlayers[2].player"
+          :player="sortedPlayers[2].player"
+        />
+        <SpecThirteenAvailableChair
+          v-else-if="thirteenStore.getStatus == 'waiting'"
+          :position="sortedPlayers[2].position"
+        />
+      </div>
+    </div>
+    <!-- <div
       v-for="(data, index) in sortedPlayers"
       :key="index"
       :class="positionClass[index]"
@@ -21,14 +113,14 @@
       <SpecThirteenCountDownStart v-if="thirteenStore.getGameStartAt" />
     </div>
 
-    <!-- My score -->
     <div class="absolute top-1 right-1 text-lg font-semibold" v-if="thirteenStore.me">
       Điểm của tôi: {{ thirteenStore.me?.score || 0 }} điểm
-    </div>
+    </div> -->
   </div>
 </template>
 <script setup lang="ts">
 import { SOCKET_EVENTS } from "~/constants";
+import {ArrowLeft } from "lucide-vue-next";
 const route = useRoute();
 const roomId = route.params.id;
 const { $socket, $router } = useNuxtApp();
@@ -40,25 +132,26 @@ import {
 type UserStatus,
 } from "~/store/module/thirteen";
 import type { Socket } from "socket.io-client";
+import copyToClipboard from "~/utils/copy-to-clipboard";
+
 const thirteenStore = useThirteenStore();
 ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.JOIN, { id: roomId });
 
 ($socket as Socket).on(
   SOCKET_EVENTS.GAME.THIRTEEN.DATA,
   (payload: GameData & { notValidRoom: string }) => {
-    console.log('Received data', payload)
-    const {id, players, host, status, gameStartAt, turn} = payload
     if (payload.hasOwnProperty('notValidRoom')) $router.push('/');
-    if (payload.hasOwnProperty('id')) thirteenStore.setIdRoom(id);
+    if (payload.hasOwnProperty('id')) thirteenStore.setIdRoom(payload.id);
+    if (payload.hasOwnProperty('host')) thirteenStore.setHost(payload.host);
+    if (payload.hasOwnProperty('status')) thirteenStore.setStatus(payload.status);
+    if (payload.hasOwnProperty('gameStartAt')) thirteenStore.setGameStartAt(payload.gameStartAt)
+    if (payload.hasOwnProperty('turn')) thirteenStore.setTurn(payload.turn)
+    if (payload.hasOwnProperty('settings')) thirteenStore.setSettings(payload.settings)
     if (payload.hasOwnProperty('players')) {
-      thirteenStore.setPlayers(players)
-      let me = players.find(player => player.id == ($socket as Socket).id)
+      thirteenStore.setPlayers(payload.players)
+      let me = payload.players.find(player => player.id == ($socket as Socket).id)
       me && thirteenStore.setMe(me)
     };
-    if (payload.hasOwnProperty('host')) thirteenStore.setHost(host);
-    if (payload.hasOwnProperty('status')) thirteenStore.setStatus(status);
-    if (payload.hasOwnProperty('gameStartAt')) thirteenStore.setGameStartAt(gameStartAt)
-    if (payload.hasOwnProperty('turn')) thirteenStore.setTurn(turn)
   }
 );
 ($socket as Socket).on(
@@ -129,7 +222,7 @@ const wrapperClass = [
 ]
 
 definePageMeta({
-  layout: "play-game",
+  layout: "game",
   scrollToTop: true,
 });
 </script>

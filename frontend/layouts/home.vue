@@ -1,11 +1,10 @@
 <template>
-  <div class="home-layout__container">
-    <LayoutHomeHeader />
-    <main class="px-2 py-1">
+  <div class="w-full h-full bg-[url('/images/bg.jpg')] min-h-lvh">
+    <div class="home-layout__container">
       <Suspense>
         <NuxtPage />
       </Suspense>
-    </main>
+    </div>
   </div>
 </template>
 <script setup lang="ts"></script>
@@ -15,6 +14,9 @@
     max-width: var(--container-width);
     margin: 0 auto;
     width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+    min-height: 100vh;
   }
 }
 </style>

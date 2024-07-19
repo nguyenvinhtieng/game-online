@@ -1,57 +1,33 @@
 <template>
-  <NuxtLink
-    class="flex items-center justify-between px-0 py-3 transition-all border-b hover:border-neutral-500 cursor-pointer"
-    :to="`/game/thirteen/${room.id}`"
-  >
-    <div class="flex items-center gap-x-3">
-      <div>#{{ room.id }}</div>
-      <div>
-        <h6
-          class="block font-sans text-base font-semibold leading-relaxed tracking-normal text-blue-gray-900 antialiased"
-        >
-          Người chơi: {{ room.players.join(", ") }}
-        </h6>
-        <p
-          class="block font-sans text-sm font-light leading-normal text-gray-700 antialiased"
-        >
-          Đã mở bàn {{ gameStartedCount }}
-        </p>
+  <tr class="border-b border-dashed border-[#E6E6E6]">
+    <td class="py-5">#{{ room.id }}</td>
+    <td class="py-5">
+      <div class="flex items-center gap-6">
+        <IconChairFull v-for="i in room.players.length" :key="i" />
+        <IconChairEmpty v-for="i in 4 - room.players.length" :key="i" />
       </div>
-    </div>
-    <a
-      href="#"
-      class="block font-sans text-sm font-bold leading-normal px-4 py-2 rounded-sm transition-all text-blue-500 antialiased hover:bg-blue-500 hover:text-white"
-    >
-      Vào chơi
-    </a>
-  </NuxtLink>
+    </td>
+    <td class="py-5">{{ room.settings?.winScore }}</td>
+    <td class="py-5">
+      <NuxtLink :to="`/game/thirteen/${room.id}`">
+        <BaseButton
+          variant="default"
+          color="primary"
+          shape="square"
+          size="md"
+          @click="() => {}"
+        >
+          <template v-slot:child> Vào phòng </template>
+        </BaseButton>
+      </NuxtLink>
+    </td>
+  </tr>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
-  room: {
-    id: string;
-    players: string[];
-    createdAt: string;
-  };
-}>();
-const gameStartedCount = ref<number | string>("vài giây trước");
-const room = shallowRef(props.room).value;
-onMounted(() => {
-  const interval = setInterval(() => {
-    const diff = new Date().getTime() - new Date(room.createdAt).getTime();
-    const diffInSeconds = Math.floor(diff / 1000);
-    if (diffInSeconds < 60) {
-      gameStartedCount.value = `${diffInSeconds} giây trước`;
-    } else if (diffInSeconds < 3600) {
-      gameStartedCount.value = `${Math.floor(diffInSeconds / 60)} phút trước`;
-    } else {
-      gameStartedCount.value = `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    }
-  }, 1000);
+import type { ThirteenGameRoomItem } from "~/store/module/thirteen";
 
-  onBeforeUnmount(() => {
-    clearInterval(interval);
-  });
-});
+const props = defineProps<{
+  room: ThirteenGameRoomItem;
+}>();
 </script>

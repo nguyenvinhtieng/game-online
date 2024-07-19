@@ -2,6 +2,9 @@ import { defineStore } from "pinia";
 import type { CardSuit, CardValue } from "~/constants";
 export type Status = "waiting" | "playing" | "finished";
 export type UserStatus = 'ready' | 'unready'
+export type ThirteenGameRoomItem = Omit<GameData, "players"> & {
+  players: string[];
+}
 export type ThirteenCard = {
   suit: CardSuit,
   value: CardValue,
@@ -20,6 +23,11 @@ export type MePlayer = Omit<Player, "cards"> & {
     isSelected?: boolean
   })[]
 }
+export type SettingThirteenGame = {
+  maxPlayers?: number;
+  winScore: number;
+  turnTimeout: number;
+}
 export type GameData = {
   id: string;
   players: Player[];
@@ -28,6 +36,7 @@ export type GameData = {
   me?: MePlayer;
   gameStartAt?: string;
   turn?: string;
+  settings?: SettingThirteenGame
 };
 export const useThirteenStore = defineStore("thirteen", {
   state: (): GameData => ({
@@ -38,6 +47,7 @@ export const useThirteenStore = defineStore("thirteen", {
     me: undefined,
     gameStartAt: undefined,
     turn: undefined,
+    settings: undefined,
   }),
   actions: {
     setIdRoom(id: string) {
@@ -60,6 +70,9 @@ export const useThirteenStore = defineStore("thirteen", {
     },
     setGameStartAt(gameStartAt?: string) {
       this.gameStartAt = gameStartAt
+    },
+    setSettings(settings?: SettingThirteenGame) {
+      this.settings = settings;
     },
     getPlayer(id: string): Player | undefined {
       return this.players.find((player) => player.id === id);
@@ -104,5 +117,8 @@ export const useThirteenStore = defineStore("thirteen", {
     getTurn() : string | undefined {
       return this.turn;
     },
+    getSettings() : SettingThirteenGame | undefined {
+      return this.settings;
+    }
   },
 });

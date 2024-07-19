@@ -28,7 +28,11 @@ const socketHandler = (io: Server) => {
             players: [],
             host: socket.id,
             status: 'waiting',
-            createdAt: new Date()
+            createdAt: new Date(),
+            settings: {
+              winScore: 500,
+              turnTimeout: 30,
+            }
           };
           await redisClient.set(redisRoomDetailKey, JSON.stringify(room));
           let result = await getThirteenList()

@@ -3,6 +3,11 @@ import { ThirteenCard } from "../utils/get-card-thirteen";
 export type GameType = 'thirteen'
 export type Status = 'waiting' | 'playing' | 'finished'
 export type UserStatus = 'ready' | 'unready'
+export type SettingThirteenGame = {
+    maxPlayers?: number;
+    winScore: number;
+    turnTimeout: number;
+}
 export type PlayerThirteen = {
     id: string;
     name: string;
@@ -20,4 +25,9 @@ export type ThirteenGame = {
     turn?: string;
     gameStartAt?: Date;
     createdAt: Date;
+    prevTurn?: {
+        id: string;
+        cards: ThirteenCard[];
+    },
+    settings: SettingThirteenGame
 }

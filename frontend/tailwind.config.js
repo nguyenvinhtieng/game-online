@@ -9,7 +9,22 @@ export default {
     "./error.vue",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#D91F26',
+          600: '#D91F26',
+          700: '#811217',
+          800: '#811316',
+          900: '#731014'
+        },
+        
+      },
+    },
+    // Change to font Montserrat
+    fontFamily: {
+      'montserrat': ['Montserrat', 'sans-serif'],
+    },
   },
   plugins: [],
 }

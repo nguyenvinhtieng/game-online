@@ -1,8 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 /* Variable */
 :root {
   --container-width: 1200px;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
 }

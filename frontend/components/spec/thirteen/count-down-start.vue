@@ -1,5 +1,5 @@
 <template>
-  <div>Ván đấu sẽ bắt đầu sau {{ gameStartCountdown }} giây nữa</div>
+  <span class="text-xs">Bắt đầu sau {{ gameStartCountdown }} giây</span>
 </template>
 
 <script setup lang="ts">
