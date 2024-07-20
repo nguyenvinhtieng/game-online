@@ -209,7 +209,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         }
 
         // Case First turn, check have lowest card
-        if(room.prevTurn.length == 0) {
+        if(room.prevTurn.length == 0 && room.winHistory.length == 0) {
             // Need to be have first card
             if(payload.cards[0].suit != room.players[myIndex].cards[0].suit || payload.cards[0].weight != room.players[myIndex].cards[0].weight) {
                 io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, {message: 'Bạn cần phải đánh quân nhỏ nhất', type: 'error'})
@@ -219,12 +219,22 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
         // Check with prev turn to allow post card
         let prevTurn = room.prevTurn[room.prevTurn.length - 1]
-        const isValidCardWithPrevTurn = checkIsValidWithPrevTurn(payload.cards, prevTurn?.id == socket.id ? prevTurn?.cards : undefined)
+        const isValidCardWithPrevTurn = checkIsValidWithPrevTurn(payload.cards, prevTurn?.id != socket.id ? prevTurn?.cards : undefined)
         if(!isValidCardWithPrevTurn) {
             io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, {message: 'Bài không hợp lệ', type: 'error'})
             return;
         }
-        timersTurn[redisKeys.detail] && clearTimeout(timersTurn[redisKeys.detail])
+        if(timersTurn[redisKeys.detail]) {
+            clearTimeout(timersTurn[redisKeys.detail])
+            delete timersTurn[redisKeys.detail]
+        }
+
+        const myPosition = room.players[myIndex].position
+        const positions = room.players.map(player => player.position).sort((a, b) => a - b)
+        const nextPosition = positions.find(position => position > myPosition) || positions[0]
+        const nextPlayer = room.players.find(player => player.position == nextPosition)
+        room.turn = nextPlayer?.id
+
         room.prevTurn.push({
             id: socket.id,
             cards: payload.cards
@@ -234,22 +244,50 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         if(room.players[myIndex].cards.length == 0) { // Finish game
             room.status = 'finished'
             room.gameStartAt = undefined
-            room.players[myIndex].score += 1
+            room.players[myIndex].score += room.settings.winScore
+            room.winner = room.players[myIndex].id
+            room.winHistory.push(room.players[myIndex].id)
             io.to(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
                 players: room.players,
                 prevTurn: room.prevTurn,
+                status: room.status,
+                gameStartAt: room.gameStartAt,
+                winner: room.winner,
+                winHistory: room.winHistory
             });
             await redisClient.set(redisKeys.detail, JSON.stringify(room));
+            
+            setTimeout(async ()=> {
+                const time = new Date();
+                time.setSeconds(time.getSeconds() + TIME_PREPARE_START_GAME);
+                room.gameStartAt = time
+                timers[redisKeys.detail] = setTimeout(()=> {
+                    startGame(room.id)
+                }, TIME_PREPARE_START_GAME * 1000)
+                io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
+                    gameStartAt: room.gameStartAt || null,
+                    status: 'waiting'
+                });
+            }, 5000)
             return;
         }
+        
         // Change turn to user have next position on list players
-        await nextTurn(payload.roomId)
-
-        await redisClient.set(redisKeys.detail, JSON.stringify(room));
+        const time = new Date();
+        time.setSeconds(time.getSeconds() + TIME_TURN);
+        room.turnTimeout = time
+        timersTurn[redisKeys.detail] = setTimeout(async () => {
+            console.log('Running timeout post for::', room.players[myIndex].name)
+            await nextTurn(payload.roomId)
+        }, TIME_TURN * 1000)
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
             prevTurn: room.prevTurn,
+            turn: room.turn,
+            turnTimeout: room.turnTimeout || null,
         });
 
+        // Save
+        await redisClient.set(redisKeys.detail, JSON.stringify(room));
         // Send card data
         await sendCardData(payload.roomId)
     })
@@ -265,7 +303,10 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             return;
         }
         const myIndex = room.players?.findIndex(player => player.id == socket.id)
-        if(myIndex == -1) return;
+        if(myIndex == -1) {
+            io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, {message: 'Bạn không phải là người chơi của phòng này!', type: 'error'})
+            return;
+        }
         const prevTurn = room.prevTurn[room.prevTurn.length - 1]
         if(prevTurn?.id == socket.id) {
             io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, {message: 'Không thể qua lượt!', type: 'error'})
@@ -276,11 +317,18 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
     async function nextTurn(roomId: string) {
         const { room, redisKeys } = await getRoomDataAndKey(roomId)
-        if(!room) return;
+        if(!room) {
+            io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, {message: 'Phòng không tồn tại!', type: 'error'})
+            return;
+        }
         const currentTurn = room.turn
         const myIndex = room.players?.findIndex(player => player.id == currentTurn)
-        if(myIndex == -1) return;
+        if(myIndex == -1) {
+            io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, {message: 'Bạn không phải là người chơi của phòng này!', type: 'error'})
+            return;
+        }
         if(timersTurn[redisKeys.detail]) {
+            // console.log('Clear time out at next')
             clearTimeout(timersTurn[redisKeys.detail])
             delete timersTurn[redisKeys.detail]
         }
@@ -289,14 +337,15 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         const nextPosition = positions.find(position => position > myPosition) || positions[0]
         const nextPlayer = room.players.find(player => player.position == nextPosition)
         room.turn = nextPlayer?.id
-        
 
-        if(room.prevTurn[room.prevTurn.length - 1]?.id != currentTurn) {
+        if(room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
             const time = new Date();
             time.setSeconds(time.getSeconds() + TIME_TURN);
             room.turnTimeout = time
             timersTurn[redisKeys.detail] = setTimeout(async () => {
+                console.log('Running timeout next::', room.players[myIndex].name)
                 await nextTurn(roomId)
+                
             }, TIME_TURN * 1000)
         } else {
             room.turnTimeout = undefined
@@ -304,7 +353,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         await redisClient.set(redisKeys.detail, JSON.stringify(room));
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
             turn: room.turn,
-            turnTimeout: room.turnTimeout,
+            turnTimeout: room.turnTimeout || null,
         });
     }
 
@@ -330,20 +379,29 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         room.status = 'playing'
         
         // Calc turn
-        let minIndex = 0;
-        let minCard = firstCardUser[0];
-        for (let i = 1; i < firstCardUser.length; i++) {
-            if (firstCardUser[i].weight < minCard.weight || (firstCardUser[i].weight == minCard.weight && suitOrder[firstCardUser[i].suit] < suitOrder[minCard.suit])) {
-                minIndex = i;
-                minCard = firstCardUser[i];
+        const isAFirstGame = room.winHistory.length == 0;
+        if(isAFirstGame) {
+            let minIndex = 0;
+            let minCard = firstCardUser[0];
+            for (let i = 1; i < firstCardUser.length; i++) {
+                if (firstCardUser[i].weight < minCard.weight || (firstCardUser[i].weight == minCard.weight && suitOrder[firstCardUser[i].suit] < suitOrder[minCard.suit])) {
+                    minIndex = i;
+                    minCard = firstCardUser[i];
+                }
             }
+            room.turn = room.players[minIndex].id
+        } else {
+            room.turn = room.winHistory[room.winHistory.length - 1]
         }
-        room.turn = room.players[minIndex].id
+        room.prevTurn = []
+        room.winner = undefined;
         await redisClient.set(redisKeys.detail, JSON.stringify(room));
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
             gameStartAt: room.gameStartAt || null,
             status: room.status,
-            turn: room.turn
+            turn: room.turn,
+            winner: null,
+            prevTurn: room.prevTurn,
         });
         await sendCardData(roomId)
     }
@@ -393,7 +451,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
     }
 };
 
-function checkIsValidWithPrevTurn(cards: ThirteenCard[], prevTurn?: ThirteenCard[], ) {
+function checkIsValidWithPrevTurn(cards: ThirteenCard[], prevTurn?: ThirteenCard[]) {
     if(!prevTurn) return true;
     const cardListType = getCardListType(cards)
     const prevTurnCardListType = getCardListType(prevTurn)
@@ -428,9 +486,11 @@ enum CardListType {
     PAIR_STRAIGHT = 'PAIR_STRAIGHT',
 }
 function getCardListType(cards: ThirteenCard[]) : CardListType | false {
+    if (cards.length == 0) return false;
     if (cards.length == 1) return CardListType.SINGLE;
     if (cards.length == 2) {
         if (cards[0].weight == cards[1].weight) return CardListType.PAIR;
+        else return false;
     }
     if (cards.length == 3) {
         const isAllCardHaveSameWeight = cards.every(card => card.weight == cards[0].weight);

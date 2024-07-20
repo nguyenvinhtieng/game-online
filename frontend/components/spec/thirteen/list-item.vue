@@ -11,13 +11,7 @@
     <td class="py-5">{{ room.settings?.winScore }}</td>
     <td class="py-5">
       <NuxtLink :to="`/game/thirteen/${room.id}`">
-        <BaseButton
-          variant="default"
-          color="primary"
-          shape="square"
-          size="sm"
-          @click="() => {}"
-        >
+        <BaseButton variant="default" color="primary" shape="square" size="sm">
           <template v-slot:child> Vào phòng </template>
         </BaseButton>
       </NuxtLink>

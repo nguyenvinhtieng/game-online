@@ -26,6 +26,7 @@
 import { PlayIcon, CircleHelp } from "lucide-vue-next";
 const { $router } = useNuxtApp();
 const device = useDevice();
+
 const handleClick = () => {
   $router.push("/game/thirteen");
 };

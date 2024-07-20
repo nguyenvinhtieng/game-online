@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative" v-if="player.cards.length > 0">
     <img
       src="/images/card/meow/after.svg"
       alt="Card After"

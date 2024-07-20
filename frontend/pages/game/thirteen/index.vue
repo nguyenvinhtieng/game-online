@@ -92,7 +92,6 @@ function searchRoom() {
 }
 ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.REGISTER_LIST);
 ($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.LIST, (list: ThirteenGameRoomItem[]) => {
-  console.log('List:', list)
   rooms.value = list.filter((room) => room.id);
 });
 ($socket as Socket).on(

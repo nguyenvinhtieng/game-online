@@ -8,7 +8,11 @@
     "
   >
     <SpecThirteenHeader />
-
+    <BaseConfetti
+      v-if="thirteenStore.getWinner && thirteenStore.getStatus == 'finished'"
+      :x="winnerPosition[0]"
+      :y="winnerPosition[1]"
+    />
     <div
       :class="
         cn(
@@ -66,7 +70,7 @@
             v-if="thirteenStore.getStatus == 'waiting'"
           />
           <SpecThirteenCards
-            v-if="thirteenStore.getStatus != 'waiting'"
+            v-if="thirteenStore.getStatus == 'playing'"
             :players="sortedPlayers.map((i) => i.player)"
           />
           <SpecThirteenCurrentCards
@@ -161,12 +165,30 @@ const sortedPlayers = computed(() => {
   return playerSorted;
 });
 
+const winnerPosition = computed(()=> {
+  let winnerId = thirteenStore.getWinner
+  if(!winnerId) return [0, 0];
+  let position: 0 | 1 | 2 | 3 = 0;
+  sortedPlayers.value.forEach((p, i) => {
+    if(p.player?.id == winnerId) {
+      position = i as 0 | 1 | 2 | 3;
+    }
+  })
+  let positions = {
+    0: [0.5, 0],
+    1: [0, 0.5],
+    2: [0.5, 1],
+    3: [1, 0.5]
+  }
+  return positions[position]
+})
+
+
 onMounted(() => {
   ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.JOIN, { id: roomId });
   ($socket as Socket).on(
     SOCKET_EVENTS.GAME.THIRTEEN.DATA,
     (payload: GameData & { notValidRoom?: string }) => {
-      console.log('Game data:', payload)
       if (payload.hasOwnProperty('notValidRoom')) $router.push('/');
       if (payload.hasOwnProperty('id')) thirteenStore.setIdRoom(payload.id);
       if (payload.hasOwnProperty('host')) thirteenStore.setHost(payload.host);
@@ -176,6 +198,8 @@ onMounted(() => {
       if (payload.hasOwnProperty('turn')) thirteenStore.setTurn(payload.turn)
       if (payload.hasOwnProperty('settings')) thirteenStore.setSettings(payload.settings)
       if (payload.hasOwnProperty('prevTurn')) thirteenStore.setPrevTurn(payload.prevTurn)
+      if (payload.hasOwnProperty('winner')) thirteenStore.setWinner(payload.winner)
+      if (payload.hasOwnProperty('winHistory')) thirteenStore.setWinHistory(payload.winHistory)
       if (payload.hasOwnProperty('players')) {
         thirteenStore.setPlayers(payload.players)
         let me = payload.players.find(player => player.id == ($socket as Socket).id)
@@ -211,7 +235,7 @@ onUnmounted(() => {
   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.DATA);
   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS);
   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD);
-  console.log('Unmounted')
+  ($socket as Socket).off(SOCKET_EVENTS.TOAST_MESSAGE);
 });
 
 

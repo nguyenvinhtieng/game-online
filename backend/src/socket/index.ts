@@ -33,6 +33,7 @@ const socketHandler = (io: Server) => {
               turnTimeout: 30,
             },
             prevTurn: [],
+            winHistory: []
           };
           await redisClient.set(redisRoomDetailKey, JSON.stringify(room));
           let result = await getThirteenList()

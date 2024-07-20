@@ -15,7 +15,7 @@ export type PlayerThirteen = {
     score: number;
     status: UserStatus;
     turn?: string;
-    position: number
+    position: number;
 }
 export type ThirteenGame = {
     id: string;
@@ -30,5 +30,7 @@ export type ThirteenGame = {
         id: string;
         cards: ThirteenCard[];
     }[],
-    settings: SettingThirteenGame
+    settings: SettingThirteenGame;
+    winner?: string;
+    winHistory: string[]
 }

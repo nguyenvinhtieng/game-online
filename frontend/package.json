@@ -14,6 +14,7 @@
     "@nuxtjs/device": "^3.1.1",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@pinia/nuxt": "^0.5.1",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lodash": "^4.17.21",
@@ -27,6 +28,7 @@
     "webstomp-client": "^1.2.6"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.6.4",
     "@types/lodash": "^4.17.7",
     "@types/socket.io-client": "^3.0.0",
     "@types/sockjs-client": "^1.5.4",

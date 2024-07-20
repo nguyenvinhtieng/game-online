@@ -41,7 +41,9 @@ export type GameData = {
   prevTurn: {
     id: string;
     cards: ThirteenCard[];
-  }[]
+  }[],
+  winner?: string,
+  winHistory: string[]
 };
 export const useThirteenStore = defineStore("thirteen", {
   state: (): GameData => ({
@@ -54,7 +56,9 @@ export const useThirteenStore = defineStore("thirteen", {
     turnTimeout: undefined,
     turn: undefined,
     settings: undefined,
-    prevTurn: []
+    prevTurn: [],
+    winner: undefined,
+    winHistory: []
   }),
   actions: {
     setIdRoom(id: string) {
@@ -89,6 +93,12 @@ export const useThirteenStore = defineStore("thirteen", {
     },
     setPrevTurn(turns: {id: string, cards: ThirteenCard[]}[]) {
       this.prevTurn = turns;
+    },
+    setWinner(winner?: string) {
+      this.winner = winner;
+    },
+    setWinHistory(winHistory: string[]) {
+      this.winHistory = winHistory;
     },
     getPlayerIndex(id: string) : number {
       return this.players.findIndex((player) => player.id === id);
@@ -141,6 +151,12 @@ export const useThirteenStore = defineStore("thirteen", {
     },
     getLatestTurn() : {id: string, cards: ThirteenCard[]} | undefined {
       return this.prevTurn[this.prevTurn.length - 1];
+    },
+    getWinner() : string | undefined {
+      return this.winner;
+    },
+    getWinHistory() : string[] {
+      return this.winHistory
     }
   },
 });
