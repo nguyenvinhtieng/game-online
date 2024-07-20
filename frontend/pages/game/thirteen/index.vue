@@ -2,7 +2,7 @@
   <div class="">
     <!-- <SpecThirteenListItem v-for="room in rooms" :room="room" /> -->
     <header
-      class="flex w-full gap-3 justify-start md:justify-center items-center py-5 flex-wrap md:flex-nowrap"
+      class="flex w-full gap-3 justify-start md:justify-center items-center py-5 flex-wrap md:flex-nowrap flex-col md:flex-row"
     >
       <div
         class="flex md:justify-center justify-start items-center gap-3 w-full md:w-fit"
@@ -19,13 +19,14 @@
       <!-- Search -->
       <form
         action=""
-        class="flex-1 flex items-center justify-center gap-3 h-14 rounded-xl border border-[#E6E6E6] bg-transparent px-4"
+        class="flex-1 flex items-center justify-center gap-3 h-14 rounded-xl border border-[#E6E6E6] bg-white px-4 w-full"
       >
         <SearchIcon class="w-6 h-6 text-neutral-800" />
         <input
           type="text"
-          class="w-full h-full flex-1 outline-none"
+          class="w-full h-full flex-1 py-3 md:py-0 outline-none bg-transparent"
           placeholder="Tìm ID phòng"
+          @change="searchRoom"
         />
       </form>
 
@@ -35,6 +36,7 @@
         shape="square"
         size="lg"
         @click="createRoom"
+        class="w-full md:w-fit"
       >
         <template v-slot:startIcon> <PlusIcon :size="24" /> </template>
         <template v-slot:child> Tạo bàn mới </template>
@@ -46,9 +48,9 @@
       <table class="w-full mt-5">
         <thead class="text-[#808080]">
           <tr>
-            <th class="text-left">ID Phòng</th>
+            <th class="text-left">ID <span class="hidden md:inline">phòng</span></th>
             <th class="text-left">Số người</th>
-            <th class="text-left">Điểm thắng</th>
+            <th class="text-left">Điểm</th>
             <th class="text-left">Thao tác</th>
           </tr>
         </thead>
@@ -85,8 +87,12 @@ function createRoom() {
     type: "thirteen",
   });
 }
+function searchRoom() {
+
+}
 ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.REGISTER_LIST);
 ($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.LIST, (list: ThirteenGameRoomItem[]) => {
+  console.log('List:', list)
   rooms.value = list.filter((room) => room.id);
 });
 ($socket as Socket).on(
@@ -104,7 +110,7 @@ onUnmounted(() => {
 });
 
 definePageMeta({
-  layout: "home",
+  layout: "default",
   scrollToTop: true,
 });
 </script>

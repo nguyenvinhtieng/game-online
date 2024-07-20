@@ -7,7 +7,6 @@ import generateRedisKey from '../utils/generate-redis-ket';
 import { ThirteenGame } from '../types/game.thirteen.type';
 const socketHandler = (io: Server) => {
   io.on('connection', (socket) => {
-
     socket.on('disconnect', () => {
     });
 

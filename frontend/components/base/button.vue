@@ -52,8 +52,8 @@ const buttonVariants = cva(
         ss: "py-1 px-2",
         xs: "py-2 px-3",
         sm: "py-3 px-4",
-        md: "py-3 px-5",
-        lg: "px-7 py-4",
+        md: "md:py-3 md:px-5 p-2 text-xs md:text-base whitespace-nowrap",
+        lg: "md:px-7 md:py-4 px-5 py-2 text-base",
       },
       shape: {
         square: "rounded-xl",

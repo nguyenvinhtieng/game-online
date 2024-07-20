@@ -4,9 +4,24 @@
       direction == 'vertical' && 'flex-col'
     }`"
   >
-    <div class="flex items-center justify-center w-20 h-20 rounded-xl">
-      <IconPlayerReady v-if="player.status == 'ready'" />
-      <IconPlayer v-else />
+    <div
+      :class="
+        cn(
+          'flex items-center justify-center w-20 h-20 rounded-xl',
+          device.isMobile && 'h-10 w-10'
+        )
+      "
+    >
+      <IconPlayerReady
+        :width="device.isMobile ? 20 : undefined"
+        :height="device.isMobile ? 40 : undefined"
+        v-if="player.status == 'ready'"
+      />
+      <IconPlayer
+        :width="device.isMobile ? 20 : undefined"
+        :height="device.isMobile ? 40 : undefined"
+        v-else
+      />
     </div>
     <div
       :class="`flex gap-2 items-start flex-col ${
@@ -14,7 +29,9 @@
       }`"
     >
       <div v-if="player.id == ($socket as Socket).id" class="flex gap-3 items-center">
-        <p class="text-primary font-semibold">
+        <p
+          :class="cn('text-primary font-semibold text-sm ', device.isMobile && 'text-xs')"
+        >
           <span
             :contenteditable="isChangeName"
             ref="nameSpan"
@@ -23,21 +40,37 @@
             }"
             >{{ player.name }}</span
           >
-          <span class="text-neutral-600 text-sm font-normal pl-[2px]">(You)</span>
+          <span class="text-neutral-600 font-normal pl-[2px]">(You)</span>
         </p>
         <button
-          class="w-8 h-8 rounded-full transition-all bg-primary md:hover:bg-primary-600 active:bg-primary-800 text-white flex items-center justify-center"
+          :class="
+            cn(
+              'w-8 h-8 rounded-full transition-all bg-primary md:hover:bg-primary-600 active:bg-primary-800 text-white flex items-center justify-center',
+              device.isMobile && 'w-4 h-4'
+            )
+          "
           v-if="thirteenStore.getStatus == 'waiting'"
           @click="saveName"
         >
-          <SaveIcon class="w-4 h-4" v-if="isChangeName" />
-          <PenIcon class="w-4 h-4" v-else />
+          <SaveIcon
+            :class="cn('w-4 h-4', device.isMobile && 'w-2 h-2')"
+            v-if="isChangeName"
+          />
+          <PenIcon :class="cn('w-4 h-4', device.isMobile && 'w-2 h-2')" v-else />
         </button>
       </div>
-      <p v-else class="font-semibold">{{ player.name }}</p>
-      <span class="text-white bg-primary rounded-xl font-semibold py-1 px-3">{{
-        player.score || 0
-      }}</span>
+      <p v-else :class="cn('font-semibold', device.isMobile && 'text-xs')">
+        {{ player.name }}
+      </p>
+      <span
+        :class="
+          cn(
+            'text-white bg-primary rounded-xl font-semibold py-1 px-3',
+            device.isMobile && 'px-2 text-xs'
+          )
+        "
+        >{{ player.score || 0 }}</span
+      >
     </div>
   </div>
 </template>
@@ -48,7 +81,7 @@ import { PenIcon, SaveIcon } from "lucide-vue-next";
 import { useThirteenStore, type Player } from "~/store/module/thirteen";
 import { useUserStore } from "~/store/module/user";
 import { SOCKET_EVENTS } from "~/constants";
-
+const device = useDevice();
 const { $socket } = useNuxtApp();
 const props = defineProps<{
   direction?: "vertical" | "horizontal";

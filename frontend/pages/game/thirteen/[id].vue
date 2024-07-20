@@ -1,40 +1,22 @@
 <template>
-  <div class="w-full h-dvh relative flex flex-col py-5 gap-5">
-    <header
-      class="flex w-full gap-3 justify-start md:justify-center items-center flex-nowrap"
-    >
-      <div
-        class="flex md:justify-center justify-start items-center gap-3 w-full md:w-fit"
-      >
-        <button
-          class="w-12 h-12 rounded-full bg-[##FAFAFA] hover:bg-neutral-100 active:bg-neutral-100 transition-all flex items-center justify-center"
-          @click="() => $router.back()"
-        >
-          <ArrowLeft class="w-6 h-6" />
-        </button>
-        <BaseButton
-          variant="default"
-          color="primary"
-          shape="square"
-          size="md"
-          @click="() => copyToClipboard(thirteenStore.getId)"
-        >
-          <template v-slot:child>
-            <span class="font-normal"
-              >ID Phòng: <strong class="ml-2">#{{ thirteenStore.getId }}</strong></span
-            >
-          </template>
-        </BaseButton>
-      </div>
-      <div class="flex-1 flex items-center justify-end gap-3">
-        <p class="whitespace-nowrap">Điểm thắng:</p>
-        <p class="text-primary text-2xl font-extrabold">
-          {{ thirteenStore.getSettings?.winScore || 0 }}
-        </p>
-      </div>
-    </header>
+  <div
+    :class="
+      cn(
+        'w-full h-dvh relative flex flex-col py-2 md:py-5 gap-2 md:gap-5',
+        device.isMobile && 'py-2 gap-2 md:py-2 md:gap-2'
+      )
+    "
+  >
+    <SpecThirteenHeader />
 
-    <div class="flex-1 overflow-hidden relative flex flex-col gap-5">
+    <div
+      :class="
+        cn(
+          'flex-1 overflow-hidden relative flex flex-col md:gap-5 gap-2',
+          device.isMobile && 'gap-2 md:gap-2'
+        )
+      "
+    >
       <div class="flex justify-center">
         <SpecThirteenPlayer
           v-if="sortedPlayers[0].player"
@@ -45,7 +27,14 @@
           :position="sortedPlayers[0].position"
         />
       </div>
-      <div class="flex justify-center items-center flex-1 gap-5">
+      <div
+        :class="
+          cn(
+            'flex justify-center items-center flex-1 md:gap-5 gap-2',
+            device.isMobile && 'gap-2 md:gap-2'
+          )
+        "
+      >
         <div
           :class="`flex justify-center ${
             thirteenStore.getStatus != 'waiting' && sortedPlayers[3].player
@@ -64,7 +53,12 @@
         </div>
         <!-- Board -->
         <div
-          class="flex-1 relative bg-primary-900 rounded-[100px] h-full border-[20px] border-primary-800"
+          :class="
+            cn(
+              'flex-1 relative bg-primary-900 rounded-[100px] h-full border-[20px] border-primary-800',
+              device.isMobile && 'border-[10px] rounded-3xl'
+            )
+          "
         >
           <SpecThirteenReadyButton />
           <SpecThirteenPositionNumber
@@ -74,6 +68,11 @@
           <SpecThirteenCards
             v-if="thirteenStore.getStatus != 'waiting'"
             :players="sortedPlayers.map((i) => i.player)"
+          />
+          <SpecThirteenCurrentCards
+            v-if="
+              thirteenStore.getStatus != 'waiting' && thirteenStore.getPrevTurn.length > 0
+            "
           />
         </div>
         <div
@@ -108,10 +107,10 @@
 </template>
 <script setup lang="ts">
 import { SOCKET_EVENTS } from "~/constants";
-import {ArrowLeft } from "lucide-vue-next";
 const route = useRoute();
 const roomId = route.params.id;
 const { $socket, $router } = useNuxtApp();
+const device = useDevice();
 import { computed } from "vue";
 import {
   useThirteenStore,
@@ -120,46 +119,9 @@ import {
 type UserStatus,
 } from "~/store/module/thirteen";
 import type { Socket } from "socket.io-client";
-import copyToClipboard from "~/utils/copy-to-clipboard";
+import type { ToastMessage } from "~/interfaces/message.interface";
 
 const thirteenStore = useThirteenStore();
-($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.JOIN, { id: roomId });
-
-($socket as Socket).on(
-  SOCKET_EVENTS.GAME.THIRTEEN.DATA,
-  (payload: GameData & { notValidRoom: string }) => {
-    console.log("DATA::", payload);
-    if (payload.hasOwnProperty('notValidRoom')) $router.push('/');
-    if (payload.hasOwnProperty('id')) thirteenStore.setIdRoom(payload.id);
-    if (payload.hasOwnProperty('host')) thirteenStore.setHost(payload.host);
-    if (payload.hasOwnProperty('status')) thirteenStore.setStatus(payload.status);
-    if (payload.hasOwnProperty('gameStartAt')) thirteenStore.setGameStartAt(payload.gameStartAt)
-    if (payload.hasOwnProperty('turnTimeout')) thirteenStore.setTurnTimeout(payload.turnTimeout)
-    if (payload.hasOwnProperty('turn')) thirteenStore.setTurn(payload.turn)
-    if (payload.hasOwnProperty('settings')) thirteenStore.setSettings(payload.settings)
-    if (payload.hasOwnProperty('prevTurn')) thirteenStore.setPrevTurn(payload.prevTurn)
-    if (payload.hasOwnProperty('players')) {
-      thirteenStore.setPlayers(payload.players)
-      let me = payload.players.find(player => player.id == ($socket as Socket).id)
-      me && thirteenStore.setMe(me)
-    };
-  }
-);
-($socket as Socket).on(
-  SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS,
-  (payload: {id: string, status: UserStatus}) => {
-    thirteenStore.setPlayerStatus(payload.id, payload.status)
-  }
-);
-($socket as Socket).on(
-  SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD,
-  (players: Player[]) => {
-    players.forEach(player => {
-      thirteenStore.setCardUser(player.id, player.cards)
-      if(player.id == ($socket as Socket).id) thirteenStore.setMe(player)
-    })
-  }
-);
 
 // On Game data change
 const players = computed(() => thirteenStore.getPlayers);
@@ -199,32 +161,62 @@ const sortedPlayers = computed(() => {
   return playerSorted;
 });
 
-const positionClass = [
-  "absolute top-1 left-1/2 -translate-x-1/2 justify-center flex flex-col items-center", // Top
-  "absolute top-1/2 left-1 -translate-y-1/2 justify-center flex flex-col items-center gap-2 md:flex-row", // Left
-  "absolute bottom-1 left-1 right-1 flex gap-[2px] justify-center", // Bottom
-  "absolute top-1/2 right-1 -translate-y-1/2 justify-center flex flex-col items-center gap-2 md:flex-row", // Right
-];
-const wrapperClass = [
-  "flex gap-1 flex-col justify-center items-center", //Top
-  "flex gap-1 justify-center items-center", //Left
-  "flex gap-1 flex-col-reverse justify-center items-center", //Bottom
-  "flex gap-1 flex-row-reverse justify-center items-center", //Left
-]
+onMounted(() => {
+  ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.JOIN, { id: roomId });
+  ($socket as Socket).on(
+    SOCKET_EVENTS.GAME.THIRTEEN.DATA,
+    (payload: GameData & { notValidRoom?: string }) => {
+      console.log('Game data:', payload)
+      if (payload.hasOwnProperty('notValidRoom')) $router.push('/');
+      if (payload.hasOwnProperty('id')) thirteenStore.setIdRoom(payload.id);
+      if (payload.hasOwnProperty('host')) thirteenStore.setHost(payload.host);
+      if (payload.hasOwnProperty('status')) thirteenStore.setStatus(payload.status);
+      if (payload.hasOwnProperty('gameStartAt')) thirteenStore.setGameStartAt(payload.gameStartAt)
+      if (payload.hasOwnProperty('turnTimeout')) thirteenStore.setTurnTimeout(payload.turnTimeout)
+      if (payload.hasOwnProperty('turn')) thirteenStore.setTurn(payload.turn)
+      if (payload.hasOwnProperty('settings')) thirteenStore.setSettings(payload.settings)
+      if (payload.hasOwnProperty('prevTurn')) thirteenStore.setPrevTurn(payload.prevTurn)
+      if (payload.hasOwnProperty('players')) {
+        thirteenStore.setPlayers(payload.players)
+        let me = payload.players.find(player => player.id == ($socket as Socket).id)
+        me && thirteenStore.setMe(me)
+      };
+    }
+  );
+  ($socket as Socket).on(
+    SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS,
+    (payload: {id: string, status: UserStatus}) => {
+      thirteenStore.setPlayerStatus(payload.id, payload.status)
+    }
+  );
+  ($socket as Socket).on(
+    SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD,
+    (players: Player[]) => {
+      players.forEach(player => {
+        thirteenStore.setCardUser(player.id, player.cards)
+        if(player.id == ($socket as Socket).id) thirteenStore.setMe(player)
+      })
+    }
+  );
+  ($socket as Socket).on(
+    SOCKET_EVENTS.TOAST_MESSAGE,
+    (toastMessage: ToastMessage) => {
+      showToast(toastMessage.message, toastMessage.type)
+    }
+  );
 
-// ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.DATA)
-// ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS)
-// ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD)
+});
 
-// unmount off event
-// onUnmounted(() => {
-//   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.DATA)
-//   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS)
-//   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD)
-// })
+onUnmounted(() => {
+  ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.DATA);
+  ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS);
+  ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD);
+  console.log('Unmounted')
+});
+
 
 definePageMeta({
-  layout: "game",
+  layout: "default",
   scrollToTop: true,
 });
 </script>

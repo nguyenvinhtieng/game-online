@@ -22,4 +22,5 @@ export const SOCKET_EVENTS = {
             SKIP_TURN: 'GAME:THIRTEEN:SKIP_TURN',
         }
     },
+    TOAST_MESSAGE: 'TOAST_MESSAGE'
 }

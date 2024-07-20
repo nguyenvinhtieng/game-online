@@ -1,6 +1,10 @@
 <template>
   <div class="relative">
-    <img src="/images/card/meow/after.svg" alt="Card After" class="w-16" />
+    <img
+      src="/images/card/meow/after.svg"
+      alt="Card After"
+      :class="cn('w-16', device.isMobile && 'w-8')"
+    />
     <span
       class="w-1/2 aspect-square absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-primary font-semibold flex items-center justify-center rounded-sm"
     >
@@ -21,6 +25,7 @@
 <script setup lang="ts">
 import { useThirteenStore, type Player } from "~/store/module/thirteen";
 import { useUserStore } from "~/store/module/user";
+const device = useDevice()
 const props = defineProps<{
   position: "right" | "left";
   player: Player;

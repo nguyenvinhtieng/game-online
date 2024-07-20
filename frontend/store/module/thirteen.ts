@@ -106,7 +106,6 @@ export const useThirteenStore = defineStore("thirteen", {
     toggleCardSelected(cardIndex: number) {
       if(!this.me) return;
       this.me.cards[cardIndex].isSelected = !this.me.cards[cardIndex].isSelected;
-      console.log(this.me.cards)
     },
   },
   getters: {

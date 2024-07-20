@@ -3,7 +3,7 @@
 @tailwind utilities;
 /* Variable */
 :root {
-  --container-width: 1200px;
+  --container-width: 1300px;
 }
 
 body {

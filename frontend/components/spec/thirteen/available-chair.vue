@@ -5,12 +5,17 @@
     }`"
   >
     <div
-      class="flex items-center justify-center w-20 h-20 border border-primary rounded-xl text-primary border-dashed hover:bg-primary transition-all cursor-pointer hover:text-white hover:border-white"
+      :class="
+        cn(
+          'flex items-center justify-center md:w-20 md:h-20 w-10 h-10 border border-primary rounded-xl text-primary border-dashed hover:bg-primary transition-all cursor-pointer hover:text-white hover:border-white',
+          device.isMobile && 'w-8 h-8 md:w-8 md:h-8'
+        )
+      "
       @click="choosePosition"
     >
       <PlusIcon />
     </div>
-    <p class="font-normal text-sm italic text-neutral-500">Available</p>
+    <p class="font-normal text-xs md:text-sm italic text-neutral-500">Available</p>
   </div>
 </template>
 
@@ -20,7 +25,7 @@ import { PlusIcon } from "lucide-vue-next";
 import { useThirteenStore, type Player } from "~/store/module/thirteen";
 import { useUserStore } from "~/store/module/user";
 import { SOCKET_EVENTS } from "~/constants";
-
+const device = useDevice();
 const { $socket } = useNuxtApp();
 const props = defineProps<{
   direction?: 'vertical' | 'horizontal';
