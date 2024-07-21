@@ -13,6 +13,9 @@
       :x="winnerPosition[0]"
       :y="winnerPosition[1]"
     />
+    <SpecThirteenModalWin
+      v-if="thirteenStore.getWinner && thirteenStore.getStatus == 'finished'"
+    />
     <div
       :class="
         cn(
@@ -226,6 +229,12 @@ onMounted(() => {
     SOCKET_EVENTS.TOAST_MESSAGE,
     (toastMessage: ToastMessage) => {
       showToast(toastMessage.message, toastMessage.type)
+    }
+  );
+  ($socket as Socket).on(
+    SOCKET_EVENTS.GAME_NOTIFICATION,
+    ({message}: {message: string}) => {
+      showGameNotification(message)
     }
   );
 

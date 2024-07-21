@@ -110,11 +110,11 @@ const updateCardValidity = () => {
     }
     return;
   }
-  if (prevTurn.id == (thirteenStore.getMe?.id || "")) {
+  if (prevTurn?.id == (thirteenStore.getMe?.id || "")) {
     isCardValid.value = true;
     return;
   }
-  const isValid = checkIsValidWithPrevTurn(mySelectedCards || [], prevTurn.cards);
+  const isValid = checkIsValidWithPrevTurn(mySelectedCards || [], prevTurn?.cards);
   if (!isValid) {
     isCardValid.value = false;
     return;
