@@ -6,7 +6,8 @@ import { PlayerThirteen, ThirteenGame, UserStatus } from '../../types/game.thirt
 import getCardThirteen, { ThirteenCard, sampleThirteenCard } from '../../utils/get-card-thirteen';
 import shuffleArray from '../../utils/shuffle-array';
 import { suitOrder } from '../../constants/cards';
-
+import jwt from 'jsonwebtoken';
+const jwtKey = process.env.JWT_SECRET || 'jwt-key';
 const handleThirteenGame = (socket: Socket, io: Server) => {
     const timers: Record<string, NodeJS.Timeout> = {}
     const timersTurn: Record<string, NodeJS.Timeout> = {}
@@ -29,19 +30,27 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             // Check have this user in room in all position
             const userLeave = room.players?.find(player => player.id == socket.id)
             if (userLeave) {
-                room.players = room.players?.filter(player => player.id != socket.id)
-                if (room.status == 'waiting') {
+                if (room.status == 'waiting' || room.status == 'finished') {
+                    room.players = room.players?.filter(player => player.id != socket.id)
                     room.gameStartAt = undefined
-                    io.to(redisRoomKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
-                        gameStartAt: undefined
+                    io.in(redisRoomKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
+                        gameStartAt: undefined,
+                        players: room.players || []
                     });
+                    await redisClient.set(redisRoomKeys.detail, JSON.stringify(room));
+                    isRoomListChange = true;
+                } else if(room.status == 'playing') {
+                    const userLeaveIndex = room.players.findIndex(player => player.id == socket.id)
+                    room.players[userLeaveIndex].status = 'disconnect'
+                    if (room.turn == socket.id) {
+                        await nextTurn(roomId.toString())
+                    }
+                    await redisClient.set(redisRoomKeys.detail, JSON.stringify(room));
+                    io.in(redisRoomKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS,  {
+                        id: socket.id,
+                        status: 'disconnect'
+                    })
                 }
-                socket.leave(redisRoomKeys.detail);
-                await redisClient.set(redisRoomKeys.detail, JSON.stringify(room));
-                io.to(redisRoomKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.USER_LEAVE, {
-                    id: socket.id,
-                });
-                isRoomListChange = true;
             }
             // Check have any user in socket room or not => delete room
             const roomSockets = io.sockets.adapter.rooms.get(redisRoomKeys.detail);
@@ -58,6 +67,49 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         }
         socket.leave('thirteen-register-list');
     });
+
+    socket.on(SOCKET_EVENTS.GAME.THIRTEEN.RE_CONNECT, async (payload: { roomId: string, token: string }) => {
+        const { roomId, token } = payload;
+        const { room, redisKeys } = await getRoomDataAndKey(roomId)
+        if (!room) return;
+        jwt.verify(token, jwtKey, async (err, decoded) => {
+            if (err || !decoded) return;
+            if(typeof decoded == 'string') return;
+            const userId = decoded.id;
+            const index = room.players.findIndex(player => player.id == userId)
+            const user = room.players[index]
+            if (!user || user.status != 'disconnect') return;
+            // Change id to new socket id
+            room.players[index].status = 'ready';
+            room.players[index].id = socket.id
+            room.prevTurn = room.prevTurn.map(turn => {
+                return {
+                    ...turn,
+                    id: turn.id == userId ? socket.id : turn.id
+                }
+            })
+            room.winHistory = room.winHistory.map(w => {
+                return w == userId ? socket.id : w
+            })
+            room.turn = room.turn == userId ? socket.id : room.turn
+            await redisClient.set(redisKeys.detail, JSON.stringify(room));
+            io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
+                players: room.players,
+                prevTurn: room.prevTurn,
+                winHistory: room.winHistory,
+                turn: room.turn,
+            });
+            let newToken = jwt.sign({ id: socket.id }, jwtKey, {
+                expiresIn: '1h'
+            })
+            io.to(socket.id).emit(SOCKET_EVENTS.GAME.THIRTEEN.USER_TOKEN, {
+                token: newToken
+            });
+            await sendCardData(roomId)
+        });
+        
+    })
+
 
     socket.on(SOCKET_EVENTS.GAME.THIRTEEN.REGISTER_LIST, async () => {
         socket.join('thirteen-register-list');
@@ -109,6 +161,13 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                 delete timers[redisKeys.detail]
             }
             room.gameStartAt = undefined;
+            // Generate token
+            const token = jwt.sign({ id: socket.id }, jwtKey, {
+                expiresIn: '1h'
+            })
+            io.to(socket.id).emit(SOCKET_EVENTS.GAME.THIRTEEN.USER_TOKEN, {
+                token: token
+            });
         }
         await redisClient.set(redisKeys.detail, JSON.stringify(room));
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
@@ -203,6 +262,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         }
         // Check card valid to post
         const cardListType = getCardListType(payload.cards)
+        
         if (!cardListType) {
             io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, { message: 'Bài không hợp lệ', type: 'error' })
             return;
@@ -216,10 +276,10 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                 return;
             }
         }
+        
 
         // Check with prev turn to allow post card
         let prevTurn = room.prevTurn[room.prevTurn.length - 1]
-        const prevTurnCardType = getCardListType(prevTurn.cards)
         const isValidCardWithPrevTurn = checkIsValidWithPrevTurn(payload.cards, prevTurn?.id != socket.id ? prevTurn?.cards : undefined)
         if (!isValidCardWithPrevTurn) {
             io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, { message: 'Bài không hợp lệ', type: 'error' })
@@ -229,7 +289,6 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             clearTimeout(timersTurn[redisKeys.detail])
             delete timersTurn[redisKeys.detail]
         }
-
         switch (cardListType) { // Show notification
             case CardListType.FOUR:
             case CardListType.PAIR_STRAIGHT:
@@ -244,8 +303,24 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                     })
                 }
                 let score = 0;
-                if ((prevTurnCardType == CardListType.SINGLE || prevTurnCardType == CardListType.PAIR || prevTurnCardType == CardListType.THREE) && prevTurn.cards[0].value == '2') {
-                    prevTurn.cards.forEach(card => {
+                let cardTurnHave2;
+                let tmpPrevTurn = [...room.prevTurn]
+                while(tmpPrevTurn.length > 0) {
+                    let prev = tmpPrevTurn.pop()
+                    if(!prev) break;
+                    let typePrev = getCardListType(prev.cards)
+                    if(typePrev == CardListType.PAIR_STRAIGHT) {
+                        continue;
+                    } else if(prev.cards.every(card => card.weight == 16)) {
+                        cardTurnHave2 = prev.cards;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+
+                if(cardTurnHave2) {
+                    cardTurnHave2.forEach(card => {
                         if (card.suit == 'hearts' || card.suit == 'diamonds') {
                             score += room.settings.winScore
                         } else {
@@ -253,20 +328,22 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                         }
                     })
                 }
+
                 const prevIndex = room.players?.findIndex(player => player.id == prevTurn.id)
                 if(score != 0 && prevIndex && prevIndex != myIndex) {
                     room.players[myIndex].score += score;
                     room.players[prevIndex].score = room.players[prevIndex].score - score < 0 ? 0 : room.players[prevIndex].score - score;
-
                     io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION, {
                         notifications: [
                             {
                                 id: room.players[myIndex].id,
-                                message: `+${score}`
+                                message: `+${score}`,
+                                type: 'success'
                             },
                             {
                                 id: room.players[prevIndex].id,
-                                message: `-${score}`
+                                message: `-${score}`,
+                                type: 'error'
                             }
                         ]
                     })
@@ -279,13 +356,13 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
                 break;
             case CardListType.PAIR:
-                if (payload.cards[0].value = '2')
+                if (payload.cards[0].value == '2')
                     io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME_NOTIFICATION, {
                         message: 'Đôi heo'
                     })
                 break;
             case CardListType.THREE:
-                if (payload.cards[0].value = '2')
+                if (payload.cards[0].value == '2')
                     io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME_NOTIFICATION, {
                         message: 'Ba con heo'
                     })
@@ -312,12 +389,14 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
 
         // Change turn to user have next position on list players
-        const time = new Date();
-        time.setSeconds(time.getSeconds() + TIME_TURN);
-        room.turnTimeout = time
-        timersTurn[redisKeys.detail] = setTimeout(async () => {
-            await nextTurn(payload.roomId)
-        }, TIME_TURN * 1000)
+        // const time = new Date();
+        // time.setSeconds(time.getSeconds() + TIME_TURN);
+        // room.turnTimeout = time
+        // timersTurn[redisKeys.detail] = setTimeout(async () => {
+        //     await nextTurn(payload.roomId)
+        // }, TIME_TURN * 1000)
+        room.turnTimeout = undefined
+
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
             prevTurn: room.prevTurn,
             turn: room.turn,
@@ -339,6 +418,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                 room1.players[myIndex].score += room1.settings.winScore
                 room1.winner = room1.players[myIndex].id
                 room1.winHistory.push(room1.players[myIndex].id)
+                room1.players = room1.players.filter(player => player.status != 'disconnect')
                 io.to(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
                     players: room1.players,
                     prevTurn: room1.prevTurn,
@@ -368,7 +448,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
     })
 
     socket.on(SOCKET_EVENTS.GAME.THIRTEEN.SKIP_TURN, async ({ roomId }: { roomId: string }) => {
-        const { room } = await getRoomDataAndKey(roomId)
+        const { room, redisKeys } = await getRoomDataAndKey(roomId)
         if (!room) {
             io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, { message: 'Phòng không tồn tại!', type: 'error' })
             return;
@@ -383,10 +463,19 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             return;
         }
         const prevTurn = room.prevTurn[room.prevTurn.length - 1]
-        if (prevTurn?.id == socket.id) {
+        if (prevTurn?.id == socket.id || room.prevTurn.length == 0) {
             io.to(socket.id).emit(SOCKET_EVENTS.TOAST_MESSAGE, { message: 'Không thể qua lượt!', type: 'error' })
             return;
         }
+        io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION, {
+            notifications: [
+                {
+                    id: room.players[myIndex].id,
+                    message: `Bỏ lượt`,
+                    type: 'success'
+                }
+            ]
+        })
         await nextTurn(roomId);
     })
 
@@ -413,18 +502,20 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         const nextPlayer = room.players.find(player => player.position == nextPosition)
         room.turn = nextPlayer?.id
 
-        if (room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
-            const time = new Date();
-            time.setSeconds(time.getSeconds() + TIME_TURN);
-            room.turnTimeout = time
-            timersTurn[redisKeys.detail] = setTimeout(async () => {
-                console.log('Running timeout next::', room.players[myIndex].name)
-                await nextTurn(roomId)
+        // if (room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
+        //     const time = new Date();
+        //     time.setSeconds(time.getSeconds() + TIME_TURN);
+        //     room.turnTimeout = time
+        //     timersTurn[redisKeys.detail] = setTimeout(async () => {
+        //         console.log('Running timeout next::', room.players[myIndex].name)
+        //         await nextTurn(roomId)
 
-            }, TIME_TURN * 1000)
-        } else {
-            room.turnTimeout = undefined
-        }
+        //     }, TIME_TURN * 1000)
+        // } else {
+        //     room.turnTimeout = undefined
+        // }
+        room.turnTimeout = undefined
+
         await redisClient.set(redisKeys.detail, JSON.stringify(room));
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
             turn: room.turn,
@@ -560,6 +651,12 @@ enum CardListType {
     STRAIGHT = 'STRAIGHT',
     PAIR_STRAIGHT = 'PAIR_STRAIGHT',
 }
+
+function checkCardIs2(cards: ThirteenCard[]) {
+    return cards.every(card => card.weight == 16)
+}
+
+
 function getCardListType(cards: ThirteenCard[]): CardListType | false {
     if (cards.length == 0) return false;
     if (cards.length == 1) return CardListType.SINGLE;

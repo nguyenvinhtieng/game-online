@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import type { CardSuit, CardValue } from "~/constants";
 export type Status = "waiting" | "playing" | "finished";
-export type UserStatus = 'ready' | 'unready'
+export type UserStatus = 'ready' | 'unready' | 'disconnect';
 export type ThirteenGameRoomItem = Omit<GameData, "players"> & {
   players: string[];
 }
@@ -114,8 +114,10 @@ export const useThirteenStore = defineStore("thirteen", {
       this.players[playerIndex].cards = cards || [];
     },
     toggleCardSelected(cardIndex: number) {
+      console.log(this.me?.cards)
       if(!this.me) return;
-      this.me.cards[cardIndex].isSelected = !this.me.cards[cardIndex].isSelected;
+      console.log(1)
+      this.me.cards[cardIndex].isSelected = !this.me.cards[cardIndex]?.isSelected;
     },
   },
   getters: {

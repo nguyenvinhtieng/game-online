@@ -1,5 +1,5 @@
 <template>
-  <div class="relative" v-if="player.cards.length > 0">
+  <div class="relative">
     <img
       src="/images/card/meow/after.svg"
       alt="Card After"
@@ -34,7 +34,6 @@ const classes: Record<"left" | "right", string> = {
   left: "top-1/2 -translate-x-full -left-5 -translate-y-1/2",
   right: "top-1/2 translate-x-full -right-5 -translate-y-1/2",
 };
-const userStore = useUserStore();
 const thirteenStore = useThirteenStore();
 </script>
 

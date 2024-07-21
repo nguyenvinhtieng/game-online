@@ -5,6 +5,8 @@ export const SOCKET_EVENTS = {
         JOIN: 'GAME:JOIN',
         THIRTEEN: {
             JOIN: 'GAME:THIRTEEN:JOIN',
+            USER_TOKEN: 'GAME:THIRTEEN:USER_TOKEN',
+            RE_CONNECT: 'GAME:THIRTEEN:RE_CONNECT',
             USER_LEAVE: 'GAME:THIRTEEN:USER_LEAVE',
             DATA: 'GAME:THIRTEEN:DATA',
             JOINED: 'GAME:THIRTEEN:JOINED',

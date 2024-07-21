@@ -2,7 +2,7 @@ import { ThirteenCard } from "../utils/get-card-thirteen";
 
 export type GameType = 'thirteen'
 export type Status = 'waiting' | 'playing' | 'finished'
-export type UserStatus = 'ready' | 'unready'
+export type UserStatus = 'ready' | 'unready' | 'disconnect'
 export type SettingThirteenGame = {
     maxPlayers?: number;
     winScore: number;

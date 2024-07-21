@@ -67,7 +67,10 @@
         size="sm"
         @click="skipTurn"
         :class="cn(device.isMobile && '!px-3 !py-1 w-full')"
-        v-if="thirteenStore.getLatestTurn?.id != me.id"
+        v-if="
+          thirteenStore.getLatestTurn?.id != me.id &&
+          thirteenStore.getPrevTurn.length != 0
+        "
       >
         <template v-slot:child>Bỏ lượt</template>
       </BaseButton>

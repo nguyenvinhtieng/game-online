@@ -129,7 +129,7 @@ import type { Socket } from "socket.io-client";
 import type { ToastMessage } from "~/interfaces/message.interface";
 
 const thirteenStore = useThirteenStore();
-
+const token_key = 'THIRTEEN:GAME:TOKEN'
 // On Game data change
 const players = computed(() => thirteenStore.getPlayers);
 const socketId = ($socket as Socket).id;
@@ -211,6 +211,12 @@ onMounted(() => {
     }
   );
   ($socket as Socket).on(
+    SOCKET_EVENTS.GAME.THIRTEEN.USER_TOKEN,
+    ({token}: {token:string}) => {
+      localStorage.setItem(token_key, token)
+    }
+  );
+  ($socket as Socket).on(
     SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS,
     (payload: {id: string, status: UserStatus}) => {
       thirteenStore.setPlayerStatus(payload.id, payload.status)
@@ -221,7 +227,9 @@ onMounted(() => {
     (players: Player[]) => {
       players.forEach(player => {
         thirteenStore.setCardUser(player.id, player.cards)
-        if(player.id == ($socket as Socket).id) thirteenStore.setMe(player)
+        if(player.id == ($socket as Socket).id) {
+          thirteenStore.setMe(player)
+        }
       })
     }
   );
@@ -238,6 +246,10 @@ onMounted(() => {
     }
   );
 
+  let token = localStorage.getItem(token_key)
+  if(token) {
+    ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.RE_CONNECT, {roomId, token})
+  }
 });
 
 onUnmounted(() => {
@@ -245,6 +257,7 @@ onUnmounted(() => {
   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS);
   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD);
   ($socket as Socket).off(SOCKET_EVENTS.TOAST_MESSAGE);
+  ($socket as Socket).off(SOCKET_EVENTS.GAME_NOTIFICATION);
 });
 
 

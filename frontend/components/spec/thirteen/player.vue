@@ -7,8 +7,9 @@
     <div
       :class="
         cn(
-          'flex items-center justify-center w-20 h-20 rounded-xl',
-          device.isMobile && 'h-10 w-10'
+          'flex items-center justify-center w-20 h-20 rounded-xl relative',
+          device.isMobile && 'h-10 w-10',
+          thirteenStore.getTurn == player.id && 'border-2 border-primary border-dashed'
         )
       "
     >
@@ -22,6 +23,22 @@
         :height="device.isMobile ? 40 : undefined"
         v-else
       />
+      <span
+        v-if="notification"
+        :class="
+          cn(
+            'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm px-2 py-1 rounded-md  text-white font-semibold animation-zoom-out origin-center',
+            device.isMobile && 'text-xs',
+            notification.type == 'success' && 'bg-green-500',
+            notification.type == 'error' && 'bg-red-500'
+          )
+        "
+      >
+        {{ notification.message }}
+      </span>
+      <span class="absolute inset-3" v-if="props.player.status == 'disconnect'">
+        <img src="/images/loading.gif" alt="Loading" class="w-full h-full" />
+      </span>
     </div>
     <div
       :class="`flex gap-2 items-start flex-col ${
@@ -88,7 +105,12 @@ const props = defineProps<{
   player: Player;
 }>();
 const { direction } = props;
-
+type Notification = {
+  type: 'success' | 'error';
+  message: string;
+  id: string;
+};
+const notification = ref<Notification | null>(null);
 const userStore = useUserStore();
 const thirteenStore = useThirteenStore();
 const nameSpan = ref<HTMLElement | null>(null);
@@ -103,7 +125,14 @@ function saveName() {
     return;
   }
   if (nameSpan.value) {
-    const newName = nameSpan.value.innerText.trim();
+    let newName = nameSpan.value.innerText.trim();
+    if (newName.includes("\n")) {
+      nameSpan.value.innerText = newName.replace("\n", "");
+    }
+    if (newName == userStore.getName) {
+      setIsChangeName(false);
+      return;
+    }
     if (newName.length > 0 && newName.length <= 20) {
       setIsChangeName(false);
       ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.CHANGE_NAME, {
@@ -112,12 +141,25 @@ function saveName() {
       });
       userStore.setName(newName);
     } else {
-      //
-      alert("Tên phải từ 1 đến 20 ký tự");
+      showToast("Tên không được để trống hoặc không quá 20 ký tự", "error");
       nameSpan.value.innerText = userStore.getName;
     }
   }
 }
+
+onMounted(() => {
+  ($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION, ({notifications}: {
+    notifications: Notification[]
+  }) => {
+    const n = notifications.find(i => i.id == props.player.id);
+    if (n) {
+      notification.value = n;
+      setTimeout(() => {
+        notification.value = null;
+      }, 2000);
+    }
+  });
+});
 </script>
 
 <style scoped lang="scss"></style>
