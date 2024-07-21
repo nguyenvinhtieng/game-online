@@ -32,20 +32,19 @@
 </template>
 
 <script setup lang="ts">
-import { debounce } from "lodash";
 import type { Socket } from "socket.io-client";
 import { SOCKET_EVENTS } from "~/constants";
 import { useThirteenStore, type UserStatus } from "~/store/module/thirteen";
 import { PlayIcon, XIcon } from "lucide-vue-next";
 const thirteenStore = useThirteenStore();
 const { $socket } = useNuxtApp();
-const toggleReady = debounce(() => {
+const toggleReady = () => {
   const status: UserStatus = thirteenStore.getMe?.status == "unready" ? 'ready' : 'unready';
   ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_PLAYER_STATUS, {
     roomId: thirteenStore.getId,
     status: status,
   });
-}, 300);
+}
 </script>
 
 <style scoped lang="scss"></style>
