@@ -33,7 +33,7 @@
           :alt="`Card ${card.value} ${card.suit}`"
           :class="
             cn(
-              'w-20 shadow-[-4px_4px_12px_0_rgba(0,0,0,0.5)] absolute top-0 rounded-lg',
+              'w-20 shadow-[-4px_4px_12px_0_rgba(0,0,0,0.5)] absolute top-0',
               card.isSelected && 'top-[-10px]',
               device.isMobile && 'w-10'
             )

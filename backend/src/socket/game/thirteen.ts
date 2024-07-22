@@ -12,7 +12,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
     const timers: Record<string, NodeJS.Timeout> = {}
     const timersTurn: Record<string, NodeJS.Timeout> = {}
     const TIME_PREPARE_START_GAME = 5
-    const TIME_TURN = 3
+    const TIME_TURN = 5
     socket.on('disconnect', async () => {
         // Get list of room
         const redisKey = generateRedisKey('thirteen')
@@ -286,6 +286,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             return;
         }
         if (timersTurn[redisKeys.detail]) {
+            console.log('CLEAR: post for', room.players[myIndex].name)
             clearTimeout(timersTurn[redisKeys.detail])
             delete timersTurn[redisKeys.detail]
         }
@@ -373,13 +374,14 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
 
         // Change turn to user have next position on list players
-        // const time = new Date();
-        // time.setSeconds(time.getSeconds() + TIME_TURN);
-        // room.turnTimeout = time
-        // timersTurn[redisKeys.detail] = setTimeout(async () => {
-        //     await nextTurn(payload.roomId)
-        // }, TIME_TURN * 1000)
-        room.turnTimeout = undefined
+        const time = new Date();
+        time.setSeconds(time.getSeconds() + TIME_TURN);
+        room.turnTimeout = time
+        timersTurn[redisKeys.detail] = setTimeout(async () => {
+            console.log('RUN: post for', room.players[myIndex].name)
+            await nextTurn(payload.roomId)
+        }, TIME_TURN * 1000)
+        // room.turnTimeout = undefined
 
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
             prevTurn: room.prevTurn,
@@ -476,7 +478,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             return;
         }
         if (timersTurn[redisKeys.detail]) {
-            // console.log('Clear time out at next')
+            console.log('CLEAR: next for', room.players[myIndex].name)
             clearTimeout(timersTurn[redisKeys.detail])
             delete timersTurn[redisKeys.detail]
         }
@@ -486,19 +488,20 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         const nextPlayer = room.players.find(player => player.position == nextPosition)
         room.turn = nextPlayer?.id
 
-        // if (room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
-        //     const time = new Date();
-        //     time.setSeconds(time.getSeconds() + TIME_TURN);
-        //     room.turnTimeout = time
-        //     timersTurn[redisKeys.detail] = setTimeout(async () => {
-        //         console.log('Running timeout next::', room.players[myIndex].name)
-        //         await nextTurn(roomId)
-
-        //     }, TIME_TURN * 1000)
-        // } else {
-        //     room.turnTimeout = undefined
-        // }
-        room.turnTimeout = undefined
+        if (room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
+            const time = new Date();
+            time.setSeconds(time.getSeconds() + TIME_TURN);
+            room.turnTimeout = time
+            timersTurn[redisKeys.detail] = setTimeout(async () => {
+                console.log('RUN: next for', room.players[myIndex].name)
+                clearTimeout(timersTurn[redisKeys.detail])
+                delete timersTurn[redisKeys.detail]
+                await nextTurn(roomId)
+            }, TIME_TURN * 1000)
+        } else {
+            room.turnTimeout = undefined
+        }
+        // room.turnTimeout = undefined
 
         await redisClient.set(redisKeys.detail, JSON.stringify(room));
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
@@ -509,9 +512,8 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
     async function startGame(roomId: string) {
         const { room, redisKeys } = await getRoomDataAndKey(roomId)
-        // const cards = shuffleArray(getCardThirteen())
-        // const cards = getCardThirteen()
-        const cards = getCardThirteen().reverse()
+        const cards = shuffleArray(getCardThirteen())
+        // const cards = getCardThirteen().reverse()
         let firstCardUser: ThirteenCard[] = []
         if (!room) return;
         room.players = room.players?.map(player => {
