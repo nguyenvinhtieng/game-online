@@ -9,7 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "start": "nuxt start",
-    "run-pm2" : "pm2 start npm --name game-fe -- start"
+    "pm2-deploy": "yarn build && pm2 start npm --name game-fe -- start"
   },
   "dependencies": {
     "@nuxtjs/device": "^3.1.1",
