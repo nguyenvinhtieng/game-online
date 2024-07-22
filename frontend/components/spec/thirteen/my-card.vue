@@ -1,7 +1,7 @@
 <template>
-  <div class="flex gap-5 w-full items-center justify-center px-9" v-if="me">
+  <div class="flex gap-5 w-full items-center justify-center px-9" v-if="player">
     <span
-      v-if="thirteenStore.turn == me.id && thirteenStore.getTurnTimeout"
+      v-if="thirteenStore.turn == player.id && thirteenStore.getTurnTimeout"
       :class="
         cn(
           'w-20 h-20 rounded-full border-2 border-white flex items-center justify-center font-semibold text-4xl text-white',
@@ -13,7 +13,7 @@
     </span>
     <div
       class="flex flex-1 flex-wrap justify-center items-center"
-      v-if="me.cards.length > 0"
+      v-if="player.cards.length > 0"
     >
       <div
         :class="
@@ -23,12 +23,12 @@
           )
         "
         :style="`width: ${
-          (me.cards.length - 1) * (device.isMobile ? 15 : 30) +
+          (player.cards.length - 1) * (device.isMobile ? 15 : 30) +
           (device.isMobile ? 40 : 80)
         }px;`"
       >
         <img
-          v-for="(card, index) in me.cards"
+          v-for="(card, index) in player.cards"
           :src="`/images/card/meow/${card.value}_${card.suit}.svg`"
           :alt="`Card ${card.value} ${card.suit}`"
           :class="
@@ -47,7 +47,7 @@
 
     <div
       :class="cn('w-28 flex flex-col gap-5', device.isMobile && 'gap-1')"
-      v-if="thirteenStore.turn == me.id"
+      v-if="thirteenStore.turn == player.id"
     >
       <BaseButton
         variant="default"
@@ -68,7 +68,7 @@
         @click="skipTurn"
         :class="cn(device.isMobile && '!px-3 !py-1 w-full')"
         v-if="
-          thirteenStore.getLatestTurn?.id != me.id &&
+          thirteenStore.getLatestTurn?.id != player.id &&
           thirteenStore.getPrevTurn.length != 0
         "
       >
@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { useThirteenStore } from "~/store/module/thirteen";
+import { useThirteenStore, type ThirteenCard, type MePlayer } from "~/store/module/thirteen";
 import { SOCKET_EVENTS } from "~/constants";
 import type { Socket } from "socket.io-client";
 import {
@@ -88,16 +88,17 @@ import {
 } from "~/utils/game/thirteen/check-logic";
 const { $socket } = useNuxtApp();
 const thirteenStore = useThirteenStore();
-const me = thirteenStore.getMe;
 const device = useDevice();
-const isCardValid = ref(false);
-const updateCardValidity = () => {
-  const allCard = thirteenStore.getMe?.cards || [];
-  const mySelectedCards = thirteenStore.getMe?.cards.filter((i) => i.isSelected) || [];
+const props = defineProps<{
+  player: MePlayer
+}>();
+const player = props.player;
+const isCardValid = computed(() => {
+  const allCard = player?.cards || [];
+  const mySelectedCards = player?.cards.filter((i) => i.isSelected) || [];
   const type = getCardListType(mySelectedCards || []);
   if (!type) {
-    isCardValid.value = false;
-    return;
+    return false;
   }
   const prevTurn = thirteenStore.getPrevTurn[thirteenStore.getPrevTurn.length - 1];
   if (!prevTurn && thirteenStore.winHistory.length == 0) {
@@ -107,36 +108,28 @@ const updateCardValidity = () => {
       mySelectedCards[0].value != allCard[0].value ||
       mySelectedCards[0].weight != allCard[0].weight
     ) {
-      isCardValid.value = false;
+      return false;
     } else {
-      isCardValid.value = true;
+      return true;
     }
-    return;
   }
-  if (prevTurn?.id == (thirteenStore.getMe?.id || "")) {
-    isCardValid.value = true;
-    return;
+  if (prevTurn?.id == (player?.id || "")) {
+    return true;
   }
   const isValid = checkIsValidWithPrevTurn(mySelectedCards || [], prevTurn?.cards);
   if (!isValid) {
-    isCardValid.value = false;
-    return;
+    return false;
   }
-  isCardValid.value = true;
-};
-watch(
-  () => thirteenStore.getMe?.cards,
-  () => {
-    updateCardValidity();
-  },
-  { deep: true }
-);
+  return true;
+});
 
 function toggleCardSelected(index: number) {
-  thirteenStore.toggleCardSelected(index);
+  const cards = [...player.cards];
+  cards[index].isSelected = !cards[index].isSelected;
+  thirteenStore.updateMyCards(cards);
 }
 function postCard() {
-  const selectedCard = thirteenStore.getMe?.cards.filter((c) => c.isSelected);
+  const selectedCard = player?.cards.filter((c) => c.isSelected);
   ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.POST_CARD, {
     roomId: thirteenStore.getId,
     cards: selectedCard,
@@ -147,6 +140,13 @@ function skipTurn() {
     roomId: thirteenStore.getId,
   });
 }
+watch(
+  () => player.cards,
+  (newVal, oldVal) => {
+    console.log('Player cards changed:', newVal, oldVal);
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped lang="scss"></style>

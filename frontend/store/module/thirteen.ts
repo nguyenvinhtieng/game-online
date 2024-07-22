@@ -113,12 +113,15 @@ export const useThirteenStore = defineStore("thirteen", {
       if(playerIndex === -1) return;
       this.players[playerIndex].cards = cards || [];
     },
-    toggleCardSelected(cardIndex: number) {
-      console.log(this.me?.cards)
+    updateMyCards(cards: ThirteenCard[]) {
       if(!this.me) return;
-      console.log(1)
-      this.me.cards[cardIndex].isSelected = !this.me.cards[cardIndex]?.isSelected;
-    },
+      this.me.cards = cards;
+      console.log("Update My card", this.me.cards)
+      const playerIndex = this.getPlayerIndex(this.me.id);
+      if(playerIndex === -1) return;
+      console.log('Update On Player')
+      this.players[playerIndex].cards = cards;
+    }
   },
   getters: {
     getId(): string {

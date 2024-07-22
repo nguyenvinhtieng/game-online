@@ -23,19 +23,6 @@
         :height="device.isMobile ? 40 : undefined"
         v-else
       />
-      <span
-        v-if="notification"
-        :class="
-          cn(
-            'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm px-2 py-1 rounded-md  text-white font-semibold animation-zoom-out origin-center',
-            device.isMobile && 'text-xs',
-            notification.type == 'success' && 'bg-green-500',
-            notification.type == 'error' && 'bg-red-500'
-          )
-        "
-      >
-        {{ notification.message }}
-      </span>
       <span class="absolute inset-3" v-if="props.player.status == 'disconnect'">
         <img src="/images/loading.gif" alt="Loading" class="w-full h-full" />
       </span>
@@ -105,11 +92,6 @@ const props = defineProps<{
   player: Player;
 }>();
 const { direction } = props;
-type Notification = {
-  type: 'success' | 'error';
-  message: string;
-  id: string;
-};
 const notification = ref<Notification | null>(null);
 const userStore = useUserStore();
 const thirteenStore = useThirteenStore();
@@ -146,20 +128,6 @@ function saveName() {
     }
   }
 }
-
-onMounted(() => {
-  ($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION, ({notifications}: {
-    notifications: Notification[]
-  }) => {
-    const n = notifications.find(i => i.id == props.player.id);
-    if (n) {
-      notification.value = n;
-      setTimeout(() => {
-        notification.value = null;
-      }, 2000);
-    }
-  });
-});
 </script>
 
 <style scoped lang="scss"></style>

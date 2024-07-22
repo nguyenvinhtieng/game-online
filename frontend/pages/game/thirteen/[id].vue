@@ -10,8 +10,6 @@
     <SpecThirteenHeader />
     <BaseConfetti
       v-if="thirteenStore.getWinner && thirteenStore.getStatus == 'finished'"
-      :x="winnerPosition[0]"
-      :y="winnerPosition[1]"
     />
     <SpecThirteenModalWin
       v-if="thirteenStore.getWinner && thirteenStore.getStatus == 'finished'"
@@ -168,25 +166,6 @@ const sortedPlayers = computed(() => {
   return playerSorted;
 });
 
-const winnerPosition = computed(()=> {
-  let winnerId = thirteenStore.getWinner
-  if(!winnerId) return [0, 0];
-  let position: 0 | 1 | 2 | 3 = 0;
-  sortedPlayers.value.forEach((p, i) => {
-    if(p.player?.id == winnerId) {
-      position = i as 0 | 1 | 2 | 3;
-    }
-  })
-  let positions = {
-    0: [0.5, 0],
-    1: [0, 0.5],
-    2: [0.5, 1],
-    3: [1, 0.5]
-  }
-  return positions[position]
-})
-
-
 onMounted(() => {
   ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.JOIN, { id: roomId });
   ($socket as Socket).on(
@@ -226,9 +205,11 @@ onMounted(() => {
     SOCKET_EVENTS.GAME.THIRTEEN.UPDATE_CARD,
     (players: Player[]) => {
       players.forEach(player => {
-        thirteenStore.setCardUser(player.id, player.cards)
         if(player.id == ($socket as Socket).id) {
           thirteenStore.setMe(player)
+          thirteenStore.updateMyCards(player.cards);
+        } else {
+          thirteenStore.setCardUser(player.id, player.cards)
         }
       })
     }

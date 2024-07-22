@@ -25,7 +25,11 @@
     class="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center justify-center w-full"
     v-if="players[2] && players[2]?.cards?.length"
   >
-    <SpecThirteenMyCard v-if="thirteenStore.getMe?.cards" />
+    <SpecThirteenMyCard
+      v-if="thirteenStore.getMe"
+      :player="thirteenStore.getMe"
+      :key="thirteenStore.getMe.cards.length"
+    />
     <SpecThirteenUserCard v-else position="right" :player="players[2]" />
   </div>
 </template>

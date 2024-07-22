@@ -472,7 +472,7 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                 {
                     id: room.players[myIndex].id,
                     message: `Bỏ lượt`,
-                    type: 'success'
+                    type: 'error'
                 }
             ]
         })
