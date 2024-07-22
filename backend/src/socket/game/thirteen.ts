@@ -374,14 +374,14 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
 
         // Change turn to user have next position on list players
-        const time = new Date();
-        time.setSeconds(time.getSeconds() + TIME_TURN);
-        room.turnTimeout = time
-        timersTurn[redisKeys.detail] = setTimeout(async () => {
-            console.log('RUN: post for', room.players[myIndex].name)
-            await nextTurn(payload.roomId)
-        }, TIME_TURN * 1000)
-        // room.turnTimeout = undefined
+        // const time = new Date();
+        // time.setSeconds(time.getSeconds() + TIME_TURN);
+        // room.turnTimeout = time
+        // timersTurn[redisKeys.detail] = setTimeout(async () => {
+        //     console.log('RUN: post for', room.players[myIndex].name)
+        //     await nextTurn(payload.roomId)
+        // }, TIME_TURN * 1000)
+        room.turnTimeout = undefined
 
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
             prevTurn: room.prevTurn,
@@ -488,20 +488,20 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         const nextPlayer = room.players.find(player => player.position == nextPosition)
         room.turn = nextPlayer?.id
 
-        if (room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
-            const time = new Date();
-            time.setSeconds(time.getSeconds() + TIME_TURN);
-            room.turnTimeout = time
-            timersTurn[redisKeys.detail] = setTimeout(async () => {
-                console.log('RUN: next for', room.players[myIndex].name)
-                clearTimeout(timersTurn[redisKeys.detail])
-                delete timersTurn[redisKeys.detail]
-                await nextTurn(roomId)
-            }, TIME_TURN * 1000)
-        } else {
-            room.turnTimeout = undefined
-        }
-        // room.turnTimeout = undefined
+        // if (room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
+        //     const time = new Date();
+        //     time.setSeconds(time.getSeconds() + TIME_TURN);
+        //     room.turnTimeout = time
+        //     timersTurn[redisKeys.detail] = setTimeout(async () => {
+        //         console.log('RUN: next for', room.players[myIndex].name)
+        //         clearTimeout(timersTurn[redisKeys.detail])
+        //         delete timersTurn[redisKeys.detail]
+        //         await nextTurn(roomId)
+        //     }, TIME_TURN * 1000)
+        // } else {
+        //     room.turnTimeout = undefined
+        // }
+        room.turnTimeout = undefined
 
         await redisClient.set(redisKeys.detail, JSON.stringify(room));
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
