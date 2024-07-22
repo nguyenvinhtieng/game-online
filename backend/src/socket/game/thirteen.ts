@@ -672,7 +672,7 @@ function getCardListType(cards: ThirteenCard[]): CardListType | false {
         const isAllCardHaveSameWeight = cards.every(card => card.weight == cards[0].weight);
         if (isAllCardHaveSameWeight) return CardListType.FOUR;
     }
-    cards.sort((a, b) => a.weight - b.weight);
+    
     let isStraight = true;
     for (let i = 1; i < cards.length; i++) {
         if (cards[i].weight - cards[i - 1].weight != 1) {
@@ -690,7 +690,7 @@ function getCardListType(cards: ThirteenCard[]): CardListType | false {
                 isPairStraight = false;
                 break;
             }
-            if (i + 2 < cards.length && cards[i].weight - cards[i + 2].weight != 1) {
+            if(i >= 2 && cards[i].weight - cards[i - 2].weight != 1) {
                 isPairStraight = false;
                 break;
             }

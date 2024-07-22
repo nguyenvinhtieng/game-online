@@ -143,7 +143,6 @@ function skipTurn() {
 watch(
   () => player.cards,
   (newVal, oldVal) => {
-    console.log('Player cards changed:', newVal, oldVal);
   },
   { deep: true }
 );

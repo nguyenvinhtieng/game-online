@@ -116,10 +116,8 @@ export const useThirteenStore = defineStore("thirteen", {
     updateMyCards(cards: ThirteenCard[]) {
       if(!this.me) return;
       this.me.cards = cards;
-      console.log("Update My card", this.me.cards)
       const playerIndex = this.getPlayerIndex(this.me.id);
       if(playerIndex === -1) return;
-      console.log('Update On Player')
       this.players[playerIndex].cards = cards;
     }
   },
