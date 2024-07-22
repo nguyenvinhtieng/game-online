@@ -12,7 +12,7 @@
       size="md"
       @click="handleClick"
     >
-      <template v-slot:startIcon> <PlayIcon :size="16" /> </template>
+      <template v-slot:startIcon> <PlayIcon :size="16" fill="currentColor" /> </template>
       <template v-slot:child> Bắt đầu chơi </template>
     </BaseButton>
     <p

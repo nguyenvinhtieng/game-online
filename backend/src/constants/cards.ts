@@ -17,8 +17,8 @@ export const suitOrder: Record<CardSuit, number> = {
     'spades': 1
 };
 
-for (const suit of suits) {
-    for (const value of values) {
+for (const value of values) {
+    for (const suit of suits) {
         CARDS.push({ suit, value });
     }
 }

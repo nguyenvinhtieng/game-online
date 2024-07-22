@@ -39,29 +39,29 @@
 import type { Socket } from "socket.io-client";
 import { SOCKET_EVENTS } from "~/constants";
 import { useThirteenStore, type Player } from "~/store/module/thirteen";
+type Notification = {
+  id: string;
+  message: string;
+  type: 'error' | 'success'
+}
 const device = useDevice()
-const { $socket } = useNuxtApp()
 const props = defineProps<{
   position: "right" | "left";
   player: Player;
 }>();
-type Notification = {
-  type: 'success' | 'error';
-  message: string;
-  id: string;
-};
-const notification = ref<Notification | null>(null);
 const classes: Record<"left" | "right", string> = {
   left: "top-1/2 -translate-x-full -left-5 -translate-y-1/2",
   right: "top-1/2 translate-x-full -right-5 -translate-y-1/2",
 };
 const thirteenStore = useThirteenStore();
+const { $socket } = useNuxtApp();
+const notification = ref<Notification | null>(null);
 
 onMounted(() => {
   ($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION, ({notifications}: {
     notifications: Notification[]
   }) => {
-    const n = notifications.find(i => i.id == props.player.id);
+    const n = notifications.find((notification) => notification.id == props.player.id);
     if (n) {
       notification.value = n;
       setTimeout(() => {
@@ -69,8 +69,7 @@ onMounted(() => {
       }, 2000);
     }
   });
-
-  onBeforeUnmount(() => {
+  onUnmounted(() => {
     ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION);
   });
 });

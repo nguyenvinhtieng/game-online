@@ -7,7 +7,7 @@
     <div
       :class="
         cn(
-          'flex items-center justify-center md:w-20 md:h-20 w-10 h-10 border border-primary rounded-xl text-primary border-dashed hover:bg-primary transition-all cursor-pointer hover:text-white hover:border-white',
+          'flex items-center justify-center md:w-20 md:h-20 w-10 h-10 border border-primary rounded-xl text-primary border-dashed md:hover:bg-primary transition-all cursor-pointer hover:text-white hover:border-white',
           device.isMobile && 'w-8 h-8 md:w-8 md:h-8'
         )
       "
@@ -15,7 +15,7 @@
     >
       <PlusIcon />
     </div>
-    <p class="font-normal text-xs md:text-sm italic text-neutral-500">Available</p>
+    <p class="font-normal text-xs md:text-sm italic text-neutral-500">Ghế trống</p>
   </div>
 </template>
 

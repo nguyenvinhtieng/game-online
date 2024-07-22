@@ -12,7 +12,7 @@
       <BaseCountDown :targetTime="thirteenStore.getTurnTimeout" />
     </span>
     <div
-      class="flex flex-1 flex-wrap justify-center items-center"
+      class="flex flex-1 flex-wrap justify-center items-center relative"
       v-if="player.cards.length > 0"
     >
       <div
@@ -33,7 +33,7 @@
           :alt="`Card ${card.value} ${card.suit}`"
           :class="
             cn(
-              'w-20 shadow-lg absolute top-0',
+              'w-20 shadow-[-4px_4px_12px_0_rgba(0,0,0,0.5)] absolute top-0 rounded-lg',
               card.isSelected && 'top-[-10px]',
               device.isMobile && 'w-10'
             )
@@ -43,6 +43,19 @@
           @click="toggleCardSelected(index)"
         />
       </div>
+      <span
+        v-if="notification"
+        :class="
+          cn(
+            'z-50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm px-2 py-1 rounded-md  font-semibold animation-zoom-out origin-center bg-white whitespace-nowrap',
+            device.isMobile && 'text-xs',
+            notification.type == 'success' && 'text-green-500',
+            notification.type == 'error' && 'text-primary'
+          )
+        "
+      >
+        {{ notification.message }}
+      </span>
     </div>
 
     <div
@@ -93,6 +106,14 @@ const props = defineProps<{
   player: MePlayer
 }>();
 const player = props.player;
+
+type Notification = {
+  id: string;
+  message: string;
+  type: 'error' | 'success'
+}
+const notification = ref<Notification | null>(null);
+
 const isCardValid = computed(() => {
   const allCard = player?.cards || [];
   const mySelectedCards = player?.cards.filter((i) => i.isSelected) || [];
@@ -146,6 +167,23 @@ watch(
   },
   { deep: true }
 );
+
+onMounted(() => {
+  ($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION, ({notifications}: {
+    notifications: Notification[]
+  }) => {
+    const n = notifications.find((notification) => notification.id == props.player.id);
+    if (n) {
+      notification.value = n;
+      setTimeout(() => {
+        notification.value = null;
+      }, 2000);
+    }
+  });
+  onUnmounted(() => {
+    ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION);
+  });
+});
 </script>
 
 <style scoped lang="scss"></style>

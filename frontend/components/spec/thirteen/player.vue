@@ -92,7 +92,7 @@ const props = defineProps<{
   player: Player;
 }>();
 const { direction } = props;
-const notification = ref<Notification | null>(null);
+
 const userStore = useUserStore();
 const thirteenStore = useThirteenStore();
 const nameSpan = ref<HTMLElement | null>(null);

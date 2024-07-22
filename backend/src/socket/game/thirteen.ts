@@ -303,34 +303,18 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                     })
                 }
                 let score = 0;
-                let cardTurnHave2;
-                let tmpPrevTurn = [...room.prevTurn]
-                while(tmpPrevTurn.length > 0) {
-                    let prev = tmpPrevTurn.pop()
-                    if(!prev) break;
-                    let typePrev = getCardListType(prev.cards)
-                    if(typePrev == CardListType.PAIR_STRAIGHT) {
-                        continue;
-                    } else if(prev.cards.every(card => card.weight == 16)) {
-                        cardTurnHave2 = prev.cards;
-                        break;
+                let cardTurnHave2 = checkPrevTurnHave2(room.prevTurn)
+                if(!cardTurnHave2?.id) break;
+                cardTurnHave2.cards.forEach(card => {
+                    if (card.suit == 'hearts' || card.suit == 'diamonds') {
+                        score += room.settings.winScore
                     } else {
-                        break;
+                        score += room.settings.winScore / 2
                     }
-                }
+                })
 
-                if(cardTurnHave2) {
-                    cardTurnHave2.forEach(card => {
-                        if (card.suit == 'hearts' || card.suit == 'diamonds') {
-                            score += room.settings.winScore
-                        } else {
-                            score += room.settings.winScore / 2
-                        }
-                    })
-                }
-
-                const prevIndex = room.players?.findIndex(player => player.id == prevTurn.id)
-                if(score != 0 && prevIndex && prevIndex != myIndex) {
+                const prevIndex = room.players?.findIndex(player => player.id == cardTurnHave2?.id)
+                if(score != 0 && typeof prevIndex == 'number' && prevIndex != myIndex) {
                     room.players[myIndex].score += score;
                     room.players[prevIndex].score = room.players[prevIndex].score - score < 0 ? 0 : room.players[prevIndex].score - score;
                     io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.USER_NOTIFICATION, {
@@ -525,7 +509,9 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
     async function startGame(roomId: string) {
         const { room, redisKeys } = await getRoomDataAndKey(roomId)
-        const cards = shuffleArray(getCardThirteen())
+        // const cards = shuffleArray(getCardThirteen())
+        // const cards = getCardThirteen()
+        const cards = getCardThirteen().reverse()
         let firstCardUser: ThirteenCard[] = []
         if (!room) return;
         room.players = room.players?.map(player => {
@@ -617,6 +603,25 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
     }
 };
 
+function checkPrevTurnHave2 (turns: {id: string, cards: ThirteenCard[]}[]) {
+    let cardTurnHave2;
+    let tmpPrevTurn = [...turns]
+    while(tmpPrevTurn.length > 0) {
+        let prev = tmpPrevTurn.pop()
+        if(!prev) break;
+        let typePrev = getCardListType(prev.cards)
+        if(typePrev == CardListType.PAIR_STRAIGHT) {
+            continue;
+        } else if(prev.cards.every(card => card.weight == 16)) {
+            cardTurnHave2 = prev;
+            break;
+        } else {
+            break;
+        }
+    }
+    return cardTurnHave2;
+}
+
 function checkIsValidWithPrevTurn(cards: ThirteenCard[], prevTurn?: ThirteenCard[]) {
     if (!prevTurn) return true;
     const cardListType = getCardListType(cards)
@@ -650,10 +655,6 @@ enum CardListType {
     FOUR = 'FOUR',
     STRAIGHT = 'STRAIGHT',
     PAIR_STRAIGHT = 'PAIR_STRAIGHT',
-}
-
-function checkCardIs2(cards: ThirteenCard[]) {
-    return cards.every(card => card.weight == 16)
 }
 
 
