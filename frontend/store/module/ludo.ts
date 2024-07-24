@@ -2,7 +2,7 @@ import type { DiceData } from './../../types/game.ludo';
 import { defineStore } from "pinia";
 import type { Chess, LudoGame, Player, Status } from "~/types/game.ludo";
 export const useLudoStore = defineStore("ludo", {
-  state: (): LudoGame & { movableChess: Chess[]} => ({
+  state: (): LudoGame & { movableChess: Chess[], isDicing?: boolean} => ({
     id: "",
     players: [],
     status: "waiting" as Status,
@@ -13,7 +13,8 @@ export const useLudoStore = defineStore("ludo", {
     winner: undefined,
     chesses: [],
     dice: undefined,
-    movableChess: []
+    movableChess: [],
+    isDicing: false,
   }),
   actions: {
     setIdRoom(id: string) {
@@ -51,6 +52,9 @@ export const useLudoStore = defineStore("ludo", {
     },
     setDice(dice?: DiceData) {
       this.dice = dice;
+    },
+    setDicing(isDicing: boolean) {
+      this.isDicing = isDicing;
     },
     setMovableChess(chesses: Chess[]) {
       this.movableChess = chesses;

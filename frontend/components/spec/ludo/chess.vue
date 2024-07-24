@@ -14,7 +14,7 @@
     >
       <IconCat :fill="hexColor" :width="40" :height="40" />
       <div
-        v-if="isMovableChess"
+        v-if="isMovableChess && !isDicing"
         class="absolute top-0 left-1/2 !-translate-x-1/2 flex items-center justify-center"
       >
         <div
@@ -32,7 +32,7 @@ import { SOCKET_EVENTS } from "~/constants/socket-event";
 import { useLudoStore } from "~/store/module/ludo";
 import type { Chess, Player } from "~/types/game.ludo";
 const ludoStore = useLudoStore();
-const { id, movableChess } = storeToRefs(ludoStore);
+const { id, movableChess, isDicing } = storeToRefs(ludoStore);
 
 const props = defineProps<{ chess: Chess }>();
 const { $socket } = useNuxtApp();

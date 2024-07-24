@@ -44,6 +44,7 @@ export const SOCKET_EVENTS = {
             ROLL: 'GAME:LUDO:ROLL',
             MOVABLE_CHESS: 'GAME:LUDO:MOVABLE_CHESS',
             MOVE_CHESS: 'GAME:LUDO:MOVE_CHESS',
+            DICE: 'GAME:LUDO:DICE',
         }
     },
     TOAST_MESSAGE: 'TOAST_MESSAGE',

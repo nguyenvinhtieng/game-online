@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import { Chess, ChessStatus, Dice, LudoColor, LudoGame, LudoPosition, UserStatus } from "../../types/game.ludo.type";
 import { getFullRouteForColor, initChessesForPosition, ludo_destination } from "../../utils/ludo-chess";
 import { color_to_position, ludo_routes, position_to_color } from "../../constants/ludo";
+import getRandomInt from "../../utils/get-random-int";
 const jwtKey = process.env.JWT_SECRET || "jwt-key";
 export const ludo_lister_register = "ludo_lister_register";
 const handleLudoGame = (socket: Socket, io: Server) => {
@@ -72,7 +73,6 @@ const handleLudoGame = (socket: Socket, io: Server) => {
             if (err || !decoded) return;
             if(typeof decoded == 'string') return;
             const userId = decoded.id;
-            console.log('ID::', userId)
             const index = room.players.findIndex(player => player.id == userId)
             const user = room.players[index]
             if (!user || user.status != 'disconnect') return;
@@ -349,18 +349,21 @@ const handleLudoGame = (socket: Socket, io: Server) => {
         const { room, redisKeys } = await getRoomDataAndKey(roomId);
         if(!room) return;
         const turn = room.turn || socket.id
-        const dice = Math.floor(Math.random() * 6) + 1 as Dice;
-        // const hash_dice = [5, 6];
-        // const random = Math.floor(Math.random() * hash_dice.length);
-        // const dice = hash_dice[random] as Dice
-        const seek = Math.floor(Math.random() * 100) + 1;
-        room.dice = {
-            value: dice,
-            seek
-        }
+       
         const player = room.players.find(p => p.id == turn)
         if(!player) return;
         const position = player.position
+        const dice = Math.floor(Math.random() * 6) + 1 as Dice;
+        const seeks = getSeeks()
+        room.dice = {
+            value: dice,
+            seek: [dice]
+        }
+        io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.LUDO.DICE, {
+            dice,
+            seeks
+        })
+
         const chesses = getChessMovable(room.chesses, position, dice)
 
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.LUDO.DATA, {
@@ -380,7 +383,7 @@ const handleLudoGame = (socket: Socket, io: Server) => {
                     turn: room.turn,
                     dice: room.dice || null,
                 });
-            }, ROLLING_TIME * 1000)
+            }, (seeks.length + 1) * 1000)
         } else if (chesses.length == 0 && dice == 6) { // quay tiep
         } else {
             io.to(turn).emit(SOCKET_EVENTS.GAME.LUDO.MOVABLE_CHESS, {
@@ -574,4 +577,16 @@ export async function getLudoList() {
     // redisClient.del(redisKey.list);
     return result;
 }
+
+
+  
+function getSeeks(): number[] {
+    const length = getRandomInt(3, 5);
+    const seeks: number[] = [];
+    for (let i = 0; i < length; i++) {
+        seeks.push(getRandomInt(1, 6));
+    }
+    return seeks;
+}
+
 export default handleLudoGame;

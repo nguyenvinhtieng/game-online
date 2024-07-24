@@ -2,12 +2,14 @@
   <div class="flex flex-col justify-center items-center w-full h-full p-10">
     <div>
       <p class="font-semibold text-black/50 text-center">ID: #{{ id }}</p>
-      <p class="mt-2 font-semibold text-black/50 text-center">Thời lượng trận đấu</p>
-      <h2 class="mt-2 font-semibold text-4xl text-black/50 text-center">15:00:00</h2>
+      <!-- <p class="mt-2 font-semibold text-black/50 text-center">Thời lượng trận đấu</p>
+      <h2 class="mt-2 font-semibold text-4xl text-black/50 text-center">15:00:00</h2> -->
     </div>
     <div class="flex-1 flex flex-col justify-center items-center gap-8">
       <div class="w-full flex flex-col gap-1">
-        <p v-if="status == 'waiting'">Hãy chọn vào màu của bạn bên bàn cờ</p>
+        <p v-if="status == 'waiting'" class="text-sm mb-3">
+          Hãy chọn vào màu yêu thích của bạn bằng cách nhấn chọn trên bàn cờ
+        </p>
         <div
           v-for="player in playerList"
           :key="player.position"
@@ -61,10 +63,18 @@
       </div>
       <template v-if="status == 'playing'">
         <p class="font-semibold text-center">Lượt chơi của</p>
-        <h2 class="text-2xl font-semibold text-[#FF2F2F] text-center">
-          {{ ludoStore.getPlayerById(turn || "")?.name }}
-        </h2>
-        <p>{{ dice?.value || null }}</p>
+        <div
+          :class="
+            cn(
+              'text-2xl font-semibold text-center flex items-center justify-center gap-2'
+            )
+          "
+          :style="{ color: colorHexCurrentPlayer }"
+        >
+          <IconCat :fill="colorHexCurrentPlayer" :width="30" :height="30" />
+          <p>{{ ludoStore.getPlayerById(turn || "")?.name }}</p>
+        </div>
+        <SpecLudoDice />
       </template>
       <template
         v-if="status == 'waiting' && players.length > 1 && ludoStore.getPlayerById(($socket as Socket).id || '') "
@@ -99,12 +109,15 @@
         color="primary"
         shape="square"
         size="md"
-        :disabled="isRolling || !isShowRoll"
-        :style="{ display: isRolling || !isShowRoll ? 'none' : 'block' }"
+        :disabled="isRolling || !isShowRoll || isDicing"
+        :style="{ display: isRolling || !isShowRoll || isDicing ? 'none' : 'block' }"
         @click="roll"
       >
         <template v-slot:child> Quay Xúc Xắc </template>
       </BaseButton>
+      <p class="text-sm" v-if="!isDicing && movableChess.length > 0">
+        Hãy chọn quân cờ bạn muốn di chuyển
+      </p>
     </div>
   </div>
 </template>
@@ -115,10 +128,11 @@ import { SOCKET_EVENTS } from "~/constants";
 import { useLudoStore } from "~/store/module/ludo";
 import { useUserStore } from "~/store/module/user";
 import type { UserStatus } from "~/types/game.ludo";
+import { positionToHex } from "~/utils/game/ludo/color-to-hex";
 const { $socket } = useNuxtApp();
 const ludoStore = useLudoStore();
 const userStore = useUserStore();
-const { turn, status, id, gameStartAt, players, dice, movableChess } = storeToRefs(
+const { turn, status, id, gameStartAt, players, isDicing, movableChess } = storeToRefs(
   ludoStore
 );
 const playerList = [
@@ -131,6 +145,11 @@ const nameSpan = ref<HTMLElement[] | null>(null);
 const isChangeName = ref(false);
 const isRolling = ref(false);
 const ROLLING_TIME = 5;
+const colorHexCurrentPlayer = computed(() => {
+  const player = ludoStore.getPlayerById(turn?.value || "");
+  if (!player) return "";
+  return positionToHex(player.position);
+});
 const isShowRoll = computed(() => {
   if (movableChess.value.length > 0) {
     return false;

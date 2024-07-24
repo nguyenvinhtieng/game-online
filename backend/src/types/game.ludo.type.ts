@@ -38,7 +38,7 @@ export type LudoGame = {
   winner?: string;
   chesses: Chess[];
   dice?: {
-    seek: number,
+    seek: Dice[],
     value: Dice
   }
 };
