@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   app: {
     head: {
-      title: "Meow Game - Play Card Games Online",
+      title: "Meow Game - Play Games Online",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -14,7 +14,7 @@ export default defineNuxtConfig({
         { name: "robots", content: "index, follow" },
         { name: "googlebot", content: "index, follow" },
         // Open Graph / Facebook
-        { property: "og:title", content: "Meow Game - Play Card Games Online" },
+        { property: "og:title", content: "Meow Game - Play Games Online" },
         { property: "og:description", content: "Play the classic card games like Thirteen with our custom Meow card deck. Enjoy a fun and engaging online card gaming experience!" },
         { property: "og:type", content: "website" },
         { property: "og:url", content: "https://game.nguyenvinhtieng.tech" },

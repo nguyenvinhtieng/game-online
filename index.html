@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <video src=""></video>
+    <script>
+        var video = document.querySelector('video');
+        navigator.mediaDevices.getUserMedia({video: true, audio: true})
+        .then(function(stream){
+            video.srcObject = stream;
+            video.play();
+            // Disable audio
+            stream.getAudioTracks()[0].enabled = false;
+
+
+            // Check have cam or not
+            var trackV = stream.getVideoTracks()[0];
+            console.log(trackV.getSettings());
+            // check have audio or not
+            var trackA = stream.getAudioTracks()[0];
+            console.log(trackA);
+        })
+        .catch(function(err){
+            console.log(err);
+        });
+    </script>
+</body>
+</html>

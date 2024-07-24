@@ -20,6 +20,12 @@ export default {
         },
         
       },
+      gridTemplateColumns: {
+        '11': 'repeat(11, minmax(0, 1fr))',
+      },
+      gridTemplateRows: {
+        '11': 'repeat(11, minmax(0, 1fr))',
+      },
     },
     // Change to font Montserrat
     fontFamily: {

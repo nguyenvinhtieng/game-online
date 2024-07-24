@@ -8,9 +8,8 @@
       </div>
       <div class="md:hidden">{{ room.players.length || 0 }} / 4</div>
     </td>
-    <td class="py-5">{{ room.settings?.winScore }}</td>
     <td class="py-5">
-      <NuxtLink :to="`/thirteen/${room.id}`">
+      <NuxtLink :to="`/ludo/${room.id}`">
         <BaseButton variant="default" color="primary" shape="square" size="sm">
           <template v-slot:child> Vào phòng </template>
         </BaseButton>
@@ -20,9 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import type { ThirteenGameRoomItem } from "~/store/module/thirteen";
+import type { LudoGame } from "~/types/game.ludo";
 
 const props = defineProps<{
-  room: ThirteenGameRoomItem;
+  room: LudoGame;
 }>();
 </script>

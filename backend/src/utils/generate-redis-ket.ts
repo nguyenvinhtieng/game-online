@@ -1,5 +1,5 @@
 import REDIS_KEYS from "../constants/redis-keys";
-import { GameType } from "../types/game.thirteen.type";
+import { GameType } from "../types/game.type";
 export interface RedisKeys {
     list: string;
     detail: string;

@@ -1,0 +1,1 @@
+export type GameType = 'thirteen' | 'ludo'
