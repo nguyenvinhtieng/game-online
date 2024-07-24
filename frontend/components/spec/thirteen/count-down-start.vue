@@ -6,9 +6,10 @@
 import { useThirteenStore } from "~/store/module/thirteen";
 const thirteenStore = useThirteenStore();
 const gameStartCountdown = ref<number | string>("vài");
+const { gameStartAt } = storeToRefs(thirteenStore);
 onMounted(() => {
-  if (thirteenStore.getGameStartAt) {
-    const startTime = new Date(thirteenStore.getGameStartAt);
+  if (gameStartAt?.value) {
+    const startTime = new Date(gameStartAt.value);
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const remainingTime = Math.max(0, Math.floor((startTime.getTime() - now) / 1000));

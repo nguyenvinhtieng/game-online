@@ -9,7 +9,7 @@
         cn(
           'flex items-center justify-center w-20 h-20 rounded-xl relative',
           device.isMobile && 'h-10 w-10',
-          thirteenStore.getTurn == player.id && 'border-2 border-primary border-dashed'
+          turn == player.id && 'border-2 border-primary border-dashed'
         )
       "
     >
@@ -53,7 +53,7 @@
               device.isMobile && 'w-4 h-4'
             )
           "
-          v-if="thirteenStore.getStatus == 'waiting'"
+          v-if="status == 'waiting'"
           @click="saveName"
         >
           <SaveIcon
@@ -95,6 +95,8 @@ const { direction } = props;
 
 const userStore = useUserStore();
 const thirteenStore = useThirteenStore();
+const {name} = storeToRefs(userStore);
+const {id, status, turn} = storeToRefs(thirteenStore);
 const nameSpan = ref<HTMLElement | null>(null);
 const isChangeName = ref(false);
 
@@ -111,7 +113,7 @@ function saveName() {
     if (newName.includes("\n")) {
       nameSpan.value.innerText = newName.replace("\n", "");
     }
-    if (newName == userStore.getName) {
+    if (newName == name.value) {
       setIsChangeName(false);
       return;
     }
@@ -119,12 +121,12 @@ function saveName() {
       setIsChangeName(false);
       ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.CHANGE_NAME, {
         name: newName,
-        roomId: thirteenStore.getId,
+        roomId: id.value,
       });
       userStore.setName(newName);
     } else {
       showToast("Tên không được để trống hoặc không quá 20 ký tự", "error");
-      nameSpan.value.innerText = userStore.getName;
+      nameSpan.value.innerText = name.value;
     }
   }
 }

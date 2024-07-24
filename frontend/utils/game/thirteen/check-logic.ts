@@ -21,6 +21,14 @@ export function checkIsValidWithPrevTurn(cards: ThirteenCard[], prevTurn?: Thirt
         && (cardListType == CardListType.FOUR || (cardListType == CardListType.PAIR_STRAIGHT && cards.length >= 8))) { // Trùm 2 con 2 bằng 4 đôi thông hoặc tứ quý
         return true;
     }
+    // Kiểm tra trường hợp trước là 3 đôi thông và hiện tại là tứ quý
+    if(prevTurnCardListType == CardListType.PAIR_STRAIGHT && prevTurn.length == 6 && cardListType == CardListType.FOUR) {
+        return true;
+    }
+    // Trường hợp trước là tứ quý và hiện tại là 4 đôi thông trở lên
+    if(prevTurnCardListType == CardListType.FOUR && cardListType == CardListType.PAIR_STRAIGHT && cards.length >= 8) {
+        return true;
+    }
     // Kiểm tra loại bài
     if (cardListType != prevTurnCardListType) return false;
     // Kiểm tra số lượng bài
@@ -65,7 +73,7 @@ export function getCardListType(cards: ThirteenCard[]) : CardListType | false {
     if (isStraight) return CardListType.STRAIGHT;
     
     // Check Đôi thông
-    if (cards.length % 2 == 0) {
+    if (cards.length % 2 == 0 && cards.length >= 6) {
         let isPairStraight = true;
         for (let i = 0; i < cards.length; i += 2) {
             if (cards[i].weight != cards[i + 1].weight) {

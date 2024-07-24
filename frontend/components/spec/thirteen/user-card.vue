@@ -25,12 +25,12 @@
     </span>
     <!-- Count down -->
     <div
-      v-if="player.id == thirteenStore.getTurn && thirteenStore.getTurnTimeout"
+      v-if="player.id == turn && turnTimeout"
       :class="`w-10 h-10 absolute border-2 border-white text-white rounded-full flex items-center justify-center font-semibold ${
         classes[props.position]
       }`"
     >
-      <BaseCountDown :targetTime="thirteenStore.getTurnTimeout" />
+      <BaseCountDown :targetTime="turnTimeout" />
     </div>
   </div>
 </template>
@@ -44,6 +44,7 @@ type Notification = {
   message: string;
   type: 'error' | 'success'
 }
+
 const device = useDevice()
 const props = defineProps<{
   position: "right" | "left";
@@ -54,6 +55,7 @@ const classes: Record<"left" | "right", string> = {
   right: "top-1/2 translate-x-full -right-5 -translate-y-1/2",
 };
 const thirteenStore = useThirteenStore();
+const {turn, turnTimeout} = storeToRefs(thirteenStore);
 const { $socket } = useNuxtApp();
 const notification = ref<Notification | null>(null);
 

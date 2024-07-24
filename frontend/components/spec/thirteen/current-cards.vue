@@ -5,16 +5,12 @@
         cn('relative justify-center h-[110px] max-w-full', device.isMobile && 'h-[55px]')
       "
       :style="`width: ${
-        (thirteenStore.getPrevTurn[thirteenStore.getPrevTurn.length - 1].cards.length -
-          1) *
-          (device.isMobile ? 15 : 30) +
+        (prevTurn[prevTurn.length - 1].cards.length - 1) * (device.isMobile ? 15 : 30) +
         (device.isMobile ? 40 : 80)
       }px;`"
     >
       <img
-        v-for="(card, index) in thirteenStore.getPrevTurn[
-          thirteenStore.getPrevTurn.length - 1
-        ].cards"
+        v-for="(card, index) in prevTurn[prevTurn.length - 1].cards"
         :src="`/images/card/meow/${card.value}_${card.suit}.svg`"
         :alt="`Card ${card.value} ${card.suit}`"
         :class="cn('w-20 shadow-lg absolute top-0', device.isMobile && 'w-10')"
@@ -30,6 +26,8 @@ import { useThirteenStore } from "~/store/module/thirteen";
 
 const thirteenStore = useThirteenStore();
 const device = useDevice();
+
+const { prevTurn } = storeToRefs(thirteenStore);
 </script>
 
 <style scoped lang="scss"></style>

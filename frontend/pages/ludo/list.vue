@@ -93,18 +93,10 @@ onMounted(() => {
   ($socket as Socket).on(SOCKET_EVENTS.GAME.LUDO.LIST, (list: LudoGame[]) => {
     rooms.value = list.filter((room) => room.id);
   });
-  ($socket as Socket).on(
-    SOCKET_EVENTS.GAME.CREATED,
-    (payload: { roomId: string; type: string }) => {
-      isCreatingRoom.value = false;
-      $router.push(`/${payload.type}/${payload.roomId}`);
-    }
-  );
 
   onUnmounted(() => {
     ($socket as Socket).emit(SOCKET_EVENTS.GAME.LUDO.UNREGISTER_LIST);
     ($socket as Socket).off(SOCKET_EVENTS.GAME.LUDO.LIST);
-    ($socket as Socket).off(SOCKET_EVENTS.GAME.CREATED);
   });
 });
 

@@ -18,7 +18,11 @@
 </template>
 <script setup lang="ts">
 import { useDevice } from "#imports";
+import type { Socket } from "socket.io-client";
 import { onMounted, ref } from "vue";
+import { SOCKET_EVENTS } from "~/constants";
+const { $socket, $router } = useNuxtApp();
+
 const device = useDevice();
 // Create ref to show modal rotate screen
 const showRequireRotate = ref(false);
@@ -26,14 +30,26 @@ onMounted(() => {
   if (device.isMobile && window.screen.orientation.type === "portrait-primary") {
     showRequireRotate.value = true;
   }
-
-  // Listen to orientation change
-  window.addEventListener("orientationchange", () => {
+  const orientationchange = () => {
     if (window.screen.orientation.type === "portrait-primary") {
       showRequireRotate.value = true;
     } else {
       showRequireRotate.value = false;
     }
+  };
+  // Listen to orientation change
+  window.addEventListener("orientationchange", orientationchange);
+
+  ($socket as Socket).on(
+    SOCKET_EVENTS.GAME.CREATED,
+    (payload: { roomId: string; type: string }) => {
+      $router.push(`/${payload.type}/${payload.roomId}`);
+    }
+  );
+
+  onUnmounted(() => {
+    window.removeEventListener("orientationchange", orientationchange);
+    ($socket as Socket).off(SOCKET_EVENTS.GAME.CREATED);
   });
 });
 </script>

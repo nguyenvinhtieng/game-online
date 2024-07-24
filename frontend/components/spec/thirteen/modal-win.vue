@@ -14,7 +14,7 @@
           <h1 class="text-4xl font-bold">{{ winnerName }}</h1>
           <span
             class="px-3 py-1 bg-primary rounded-xl text-white font-semibold text-4xl w-fit"
-            >+{{ thirteenStore.getSettings?.winScore }}</span
+            >+{{ settings?.winScore }}</span
           >
         </div>
       </div>
@@ -23,15 +23,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import { useThirteenStore } from "~/store/module/thirteen";
+import { useThirteenStore, type Player } from "~/store/module/thirteen";
 
 const device = useDevice();
 const thirteenStore = useThirteenStore();
-// Get winner name from thirteenStore.getWinner
+const { winner, players, settings } = storeToRefs(thirteenStore);
 
 const winnerName = computed(() => {
-  let winnerId = thirteenStore.getWinner || "";
-  let winner = thirteenStore.getPlayers.find((player) => player.id === winnerId);
-  return winner?.name || "";
+  let winnerId = winner?.value;
+  let w = players.value.find((player: Player) => player.id === winnerId);
+  return w?.name || "";
 });
 </script>

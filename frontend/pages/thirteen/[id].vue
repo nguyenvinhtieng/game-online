@@ -128,17 +128,19 @@ import type { Socket } from "socket.io-client";
 import type { ToastMessage } from "~/interfaces/message.interface";
 
 const thirteenStore = useThirteenStore();
+
+const { id, players, status,  } = storeToRefs(thirteenStore);
+
 const token_key = 'THIRTEEN:GAME:TOKEN'
 // On Game data change
-const players = computed(() => thirteenStore.getPlayers);
 const socketId = ($socket as Socket).id;
 const sortedPlayers = computed(() => {
   let playerSorted: { player?: Player; position: number }[] = [];
-  let me = players.value.find((player) => player.id === socketId);
+  let me = players.value.find((player: Player) => player.id === socketId);
   if (me) {
     const adjustedIndex = (index: number) => (index + 4) % 4;
     const getUserAtPosition = (position: number) => {
-      return  players.value.find((player) => player.position == position)
+      return  players.value.find((player: Player) => player.position == position)
     }
     playerSorted = [
       {
@@ -157,10 +159,10 @@ const sortedPlayers = computed(() => {
     ];
   } else {
     playerSorted = [
-      { player: players.value.find((player) => player.position == 0), position: 0 },
-      { player: players.value.find((player) => player.position == 1), position: 1 },
-      { player: players.value.find((player) => player.position == 2), position: 2 },
-      { player: players.value.find((player) => player.position == 3), position: 3 },
+      { player: players.value.find((player: Player) => player.position == 0), position: 0 },
+      { player: players.value.find((player: Player) => player.position == 1), position: 1 },
+      { player: players.value.find((player: Player) => player.position == 2), position: 2 },
+      { player: players.value.find((player: Player) => player.position == 3), position: 3 },
     ];
   }
 

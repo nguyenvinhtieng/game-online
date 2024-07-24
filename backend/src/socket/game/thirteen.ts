@@ -304,7 +304,8 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                     })
                 }
                 let score = 0;
-                let cardTurnHave2 = checkPrevTurnHave2(room.prevTurn)
+                let {cardTurnHave2, numTurn} = checkPrevTurnHave2(room.prevTurn)
+                console.log({cardTurnHave2, numTurn})
                 if(!cardTurnHave2?.id) break;
                 cardTurnHave2.cards.forEach(card => {
                     if (card.suit == 'hearts' || card.suit == 'diamonds') {
@@ -313,8 +314,9 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                         score += room.settings.winScore / 2
                     }
                 })
+                score = score * numTurn
 
-                const prevIndex = room.players?.findIndex(player => player.id == cardTurnHave2?.id)
+                const prevIndex = room.players?.findIndex(player => player.id == prevTurn?.id)
                 if(score != 0 && typeof prevIndex == 'number' && prevIndex != myIndex) {
                     room.players[myIndex].score += score;
                     room.players[prevIndex].score = room.players[prevIndex].score - score < 0 ? 0 : room.players[prevIndex].score - score;
@@ -478,7 +480,6 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             return;
         }
         if (timersTurn[redisKeys.detail]) {
-            console.log('CLEAR: next for', room.players[myIndex].name)
             clearTimeout(timersTurn[redisKeys.detail])
             delete timersTurn[redisKeys.detail]
         }
@@ -608,11 +609,13 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 function checkPrevTurnHave2 (turns: {id: string, cards: ThirteenCard[]}[]) {
     let cardTurnHave2;
     let tmpPrevTurn = [...turns]
+    let numTurn = 0;
     while(tmpPrevTurn.length > 0) {
+        numTurn++;
         let prev = tmpPrevTurn.pop()
         if(!prev) break;
         let typePrev = getCardListType(prev.cards)
-        if(typePrev == CardListType.PAIR_STRAIGHT) {
+        if(typePrev == CardListType.PAIR_STRAIGHT || typePrev == CardListType.FOUR) {
             continue;
         } else if(prev.cards.every(card => card.weight == 16)) {
             cardTurnHave2 = prev;
@@ -621,7 +624,10 @@ function checkPrevTurnHave2 (turns: {id: string, cards: ThirteenCard[]}[]) {
             break;
         }
     }
-    return cardTurnHave2;
+    return {
+        cardTurnHave2,
+        numTurn
+    };
 }
 
 function checkIsValidWithPrevTurn(cards: ThirteenCard[], prevTurn?: ThirteenCard[]) {
@@ -637,6 +643,14 @@ function checkIsValidWithPrevTurn(cards: ThirteenCard[], prevTurn?: ThirteenCard
     }
     if (prevTurnCardListType == CardListType.PAIR && prevTurn[0].weight == 16
         && (cardListType == CardListType.FOUR || (cardListType == CardListType.PAIR_STRAIGHT && cards.length >= 8))) { // Trùm 2 con 2 bằng 4 đôi thông hoặc tứ quý
+        return true;
+    }
+    // Kiểm tra trường hợp trước là 3 đôi thông và hiện tại là tứ quý
+    if(prevTurnCardListType == CardListType.PAIR_STRAIGHT && prevTurn.length == 6 && cardListType == CardListType.FOUR) {
+        return true;
+    }
+    // Trường hợp trước là tứ quý và hiện tại là 4 đôi thông trở lên
+    if(prevTurnCardListType == CardListType.FOUR && cardListType == CardListType.PAIR_STRAIGHT && cards.length >= 8) {
         return true;
     }
     // Kiểm tra loại bài
@@ -686,7 +700,7 @@ function getCardListType(cards: ThirteenCard[]): CardListType | false {
     if (isStraight) return CardListType.STRAIGHT;
 
     // Check Đôi thông
-    if (cards.length % 2 == 0) {
+    if (cards.length % 2 == 0 && cards.length >= 6) {
         let isPairStraight = true;
         for (let i = 0; i < cards.length; i += 2) {
             if (cards[i].weight != cards[i + 1].weight) {

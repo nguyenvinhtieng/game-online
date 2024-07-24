@@ -18,10 +18,11 @@ export type Player = {
   score: number;
   position: number;
 };
+export type MyCard = (ThirteenCard & {
+  isSelected?: boolean
+})
 export type MePlayer = Omit<Player, "cards"> & {
-  cards: (ThirteenCard & {
-    isSelected?: boolean
-  })[]
+  cards: MyCard[]
 }
 export type SettingThirteenGame = {
   maxPlayers?: number;
@@ -119,6 +120,10 @@ export const useThirteenStore = defineStore("thirteen", {
       const playerIndex = this.getPlayerIndex(this.me.id);
       if(playerIndex === -1) return;
       this.players[playerIndex].cards = cards;
+    },
+    toggleCardSelected(index: number) {
+      if(!this.me) return;
+      this.me.cards[index].isSelected = !this.me.cards[index].isSelected;
     }
   },
   getters: {

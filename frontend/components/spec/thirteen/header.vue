@@ -7,10 +7,7 @@
       >
         <ArrowLeft class="w-6 h-6" />
       </button>
-      <p class="text-xs">
-        Phòng: #{{ thirteenStore.getId }} -
-        {{ thirteenStore.getSettings?.winScore || 0 }} điểm
-      </p>
+      <p class="text-xs">Phòng: #{{ id }} - {{ settings?.winScore || 0 }} điểm</p>
     </div>
   </header>
   <header
@@ -29,11 +26,11 @@
         color="primary"
         shape="square"
         size="md"
-        @click="() => copyToClipboard(thirteenStore.getId)"
+        @click="() => copyToClipboard(id)"
       >
         <template v-slot:child>
           <span class="font-normal"
-            >ID Phòng: <strong class="ml-2">#{{ thirteenStore.getId }}</strong></span
+            >ID Phòng: <strong class="ml-2">#{{ id }}</strong></span
           >
         </template>
       </BaseButton>
@@ -41,7 +38,7 @@
     <div class="flex-1 flex items-center justify-end gap-3">
       <p class="whitespace-nowrap">Điểm thắng:</p>
       <p class="text-primary text-2xl font-extrabold">
-        {{ thirteenStore.getSettings?.winScore || 0 }}
+        {{ settings?.winScore || 0 }}
       </p>
     </div>
   </header>
@@ -54,5 +51,6 @@ import { useThirteenStore } from "~/store/module/thirteen";
 import copyToClipboard from "~/utils/copy-to-clipboard";
 
 const thirteenStore = useThirteenStore();
+const { id, settings } = storeToRefs(thirteenStore);
 </script>
 <style scoped lang="scss"></style>

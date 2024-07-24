@@ -94,18 +94,11 @@ function searchRoom() {
 ($socket as Socket).on(SOCKET_EVENTS.GAME.THIRTEEN.LIST, (list: ThirteenGameRoomItem[]) => {
   rooms.value = list.filter((room) => room.id);
 });
-($socket as Socket).on(
-  SOCKET_EVENTS.GAME.CREATED,
-  (payload: { roomId: string; type: string }) => {
-    isCreatingRoom.value = false;
-    $router.push(`/game/${payload.type}/${payload.roomId}`);
-  }
-);
+
 
 onUnmounted(() => {
   ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.UNREGISTER_LIST);
   ($socket as Socket).off(SOCKET_EVENTS.GAME.THIRTEEN.LIST);
-  ($socket as Socket).off(SOCKET_EVENTS.GAME.CREATED);
 });
 
 definePageMeta({

@@ -33,11 +33,13 @@ const props = defineProps<{
 }>();
 const userStore = useUserStore();
 const thirteenStore = useThirteenStore();
+const { id } = storeToRefs(thirteenStore)
+const { name } = storeToRefs(userStore)
 function choosePosition() {
   ($socket as Socket).emit(SOCKET_EVENTS.GAME.THIRTEEN.PICK_POSITION, {
-    id: thirteenStore.getId,
+    id: id.value,
     position: props.position,
-    name: userStore.getName,
+    name: name.value,
   });
 }
 </script>
