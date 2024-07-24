@@ -4,7 +4,7 @@ export default function showGameNotification(message: string) {
     checkToCreateToastWrapper();
     const toast = document.createElement('div');
     toast.textContent = message;
-    toast.setAttribute('style', 'border-radius: 0.5rem; padding: 8px 12px; color: #0396ff; font-size: 24px; font-weight: bold');
+    toast.setAttribute('style', 'border-radius: 0.5rem; padding: 8px 12px; color: #0396ff; background-color: #fff; font-size: 24px; font-weight: bold');
     toast.setAttribute('class', 'animation-zoom-out');
     const toastWrapper = document.getElementById(id);
     if (toastWrapper) {
