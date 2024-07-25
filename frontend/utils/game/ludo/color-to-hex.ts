@@ -21,9 +21,9 @@ export function positionToHex(position: LudoPosition) {
         case 1:
             return "#FF2F2F";
         case 2:
-            return "#2FFF50";
-        case 3:
             return "#2F8FFF";
+        case 3:
+            return "#2FFF50";
         case 4:
             return "#FFD700";
         default:

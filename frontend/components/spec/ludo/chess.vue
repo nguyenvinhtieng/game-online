@@ -6,7 +6,7 @@
     <div
       :class="
         cn(
-          'flex items-center justify-center relative',
+          'flex items-center justify-center relative h-full',
           isMovableChess && 'cursor-pointer hover:opacity-40'
         )
       "

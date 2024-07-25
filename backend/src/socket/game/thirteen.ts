@@ -305,7 +305,6 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
                 }
                 let score = 0;
                 let {cardTurnHave2, numTurn} = checkPrevTurnHave2(room.prevTurn)
-                console.log({cardTurnHave2, numTurn})
                 if(!cardTurnHave2?.id) break;
                 cardTurnHave2.cards.forEach(card => {
                     if (card.suit == 'hearts' || card.suit == 'diamonds') {
