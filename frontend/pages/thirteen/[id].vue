@@ -2,7 +2,7 @@
   <div
     :class="
       cn(
-        'w-full h-dvh relative flex flex-col py-2 md:py-5 gap-2 md:gap-5',
+        'w-full h-dvh relative flex flex-col py-1 gap-1 md:gap-1',
         device.isMobile && 'py-2 gap-2 md:py-2 md:gap-2'
       )
     "
@@ -17,7 +17,7 @@
     <div
       :class="
         cn(
-          'flex-1 overflow-hidden relative flex flex-col md:gap-5 gap-2',
+          'flex-1 overflow-hidden relative flex flex-col md:gap-2 gap-2',
           device.isMobile && 'gap-2 md:gap-2'
         )
       "
@@ -60,7 +60,7 @@
         <div
           :class="
             cn(
-              'flex-1 relative bg-primary-900 rounded-[100px] h-full border-[20px] border-primary-800',
+              'flex-1 relative bg-primary-900 rounded-[100px] h-full border-[12px] border-primary-800',
               device.isMobile && 'border-[10px] rounded-3xl'
             )
           "
@@ -78,6 +78,7 @@
             v-if="
               thirteenStore.getStatus != 'waiting' && thirteenStore.getPrevTurn.length > 0
             "
+            :sortedPlayers="sortedPlayers"
           />
         </div>
         <div

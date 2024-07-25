@@ -5,8 +5,8 @@ pm2 delete game-fe
 pm2 delete game-api
 
 # Fetch and pull new source code
-# git fetch
-# git pull
+git fetch
+git pull
 
 # Navigate to the frontend directory, build the project, and start it with PM2
 cd ../frontend

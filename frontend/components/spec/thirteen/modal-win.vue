@@ -5,7 +5,9 @@
         device.isMobile ? 'p-5' : 'p-10'
       }`"
     >
-      <div class="z-[1] relative flex gap-10 items-center justify-center">
+      <div
+        class="z-[1] relative flex gap-10 items-center justify-center animation-zoom-out"
+      >
         <div>
           <IconCup />
         </div>

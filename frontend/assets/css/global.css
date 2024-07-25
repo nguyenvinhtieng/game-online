@@ -12,6 +12,50 @@ body {
 .animation-zoom-out {
   animation: zoom-out 0.3s ease;
 }
+.animate-card-bottom {
+  animation: postCardFromBottom 0.3s ease;
+}
+.animate-card-top {
+  animation: postCardFromTop 0.3s ease;
+}
+.animate-card-left {
+  animation: postCardFromLeft 0.3s ease;
+}
+.animate-card-right {
+  animation: postCardFromRight 0.3s ease;
+}
+@keyframes postCardFromBottom {
+  0% {
+    transform: translateY(200px) scale(0.3);
+  }
+  100% {
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+@keyframes postCardFromTop {
+  0% {
+    transform: translateY(-200px) scale(0.3);
+  }
+  100% {
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+@keyframes postCardFromLeft {
+  0% {
+    transform: translateX(-200px) scale(0.3);
+  }
+  100% {
+    transform: translateX(0) scale(1) rotate(0);
+  }
+}
+@keyframes postCardFromRight {
+  0% {
+    transform: translateX(200px) scale(0.3);
+  }
+  100% {
+    transform: translateX(0) scale(1) rotate(0);
+  }
+}
 @keyframes zoom-out {
   0% {
     scale: 3

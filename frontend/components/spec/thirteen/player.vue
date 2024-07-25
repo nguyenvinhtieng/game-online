@@ -1,34 +1,29 @@
 <template>
   <div
-    :class="`flex gap-3 items-center justify-center ${
-      direction == 'vertical' && 'flex-col'
-    }`"
+    :class="
+      cn(
+        'flex gap-4 items-center justify-center p-1 px-4',
+        direction == 'vertical' && 'flex-col',
+        turn == player.id && 'border border-primary  rounded-lg shadow-2xl bg-white'
+      )
+    "
   >
     <div
       :class="
         cn(
-          'flex items-center justify-center w-20 h-20 rounded-xl relative',
-          device.isMobile && 'h-10 w-10',
-          turn == player.id && 'border-2 border-primary border-dashed'
+          'flex items-center justify-center rounded-xl relative',
+          device.isMobile && 'h-10 w-10'
         )
       "
     >
-      <IconPlayerReady
-        :width="device.isMobile ? 20 : undefined"
-        :height="device.isMobile ? 40 : undefined"
-        v-if="player.status == 'ready'"
-      />
-      <IconPlayer
-        :width="device.isMobile ? 20 : undefined"
-        :height="device.isMobile ? 40 : undefined"
-        v-else
-      />
+      <IconPlayerReady :width="20" :height="30" v-if="player.status == 'ready'" />
+      <IconPlayer :width="20" :height="30" v-else />
       <span class="absolute inset-3" v-if="props.player.status == 'disconnect'">
         <img src="/images/loading.gif" alt="Loading" class="w-full h-full" />
       </span>
     </div>
     <div
-      :class="`flex gap-2 items-start flex-col ${
+      :class="`flex gap-0.5 items-start flex-col ${
         direction == 'vertical' && 'items-center'
       }`"
     >
@@ -69,7 +64,7 @@
       <span
         :class="
           cn(
-            'text-white bg-primary rounded-xl font-semibold py-1 px-3',
+            'text-white bg-primary rounded-xl font-semibold py-1 px-3 leading-none',
             device.isMobile && 'px-2 text-xs'
           )
         "

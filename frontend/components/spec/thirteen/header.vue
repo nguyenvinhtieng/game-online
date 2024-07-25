@@ -16,24 +16,16 @@
   >
     <div class="flex md:justify-center justify-start items-center gap-3 w-full md:w-fit">
       <button
-        class="w-12 h-12 rounded-full bg-[##FAFAFA] hover:bg-neutral-100 active:bg-neutral-100 transition-all flex items-center justify-center"
+        class="w-12 h-12 rounded-full bg-[#FAFAFA] hover:bg-neutral-100 active:bg-neutral-100 transition-all flex items-center justify-center"
         @click="() => $router.back()"
       >
         <ArrowLeft class="w-6 h-6" />
       </button>
-      <BaseButton
-        variant="default"
-        color="primary"
-        shape="square"
-        size="md"
-        @click="() => copyToClipboard(id)"
-      >
-        <template v-slot:child>
-          <span class="font-normal"
-            >ID Phòng: <strong class="ml-2">#{{ id }}</strong></span
-          >
-        </template>
-      </BaseButton>
+      <button @click="() => copyToClipboard(id)">
+        <span class="font-normal"
+          >ID Phòng: <strong class="ml-2">#{{ id }}</strong></span
+        >
+      </button>
     </div>
     <div class="flex-1 flex items-center justify-end gap-3">
       <p class="whitespace-nowrap">Điểm thắng:</p>
