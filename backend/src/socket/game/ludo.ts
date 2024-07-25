@@ -383,7 +383,7 @@ const handleLudoGame = (socket: Socket, io: Server) => {
                     turn: room.turn,
                     dice: room.dice || null,
                 });
-            }, (seeks.length + 1) * 1000)
+            }, (seeks.length + 2) * 50)
         } else if (chesses.length == 0 && dice == 6) { // quay tiep
         } else {
             io.to(turn).emit(SOCKET_EVENTS.GAME.LUDO.MOVABLE_CHESS, {
@@ -581,9 +581,8 @@ export async function getLudoList() {
 
   
 function getSeeks(): number[] {
-    const length = getRandomInt(3, 5);
     const seeks: number[] = [];
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < 20; i++) {
         seeks.push(getRandomInt(1, 6));
     }
     return seeks;

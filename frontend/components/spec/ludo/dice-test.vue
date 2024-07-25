@@ -1,37 +1,40 @@
 <template>
-  <div class="scene w-16 h-16 mx-auto text-center">
-    <div class="cube" :class="{ rolling: isRolling }" :style="transformStyle">
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face1"
-      >
-        <img src="/images/ludo/dice1.svg" alt="1" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face2"
-      >
-        <img src="/images/ludo/dice2.svg" alt="2" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face3"
-      >
-        <img src="/images/ludo/dice3.svg" alt="3" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face4"
-      >
-        <img src="/images/ludo/dice4.svg" alt="4" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face5"
-      >
-        <img src="/images/ludo/dice5.svg" alt="5" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face6"
-      >
-        <img src="/images/ludo/dice6.svg" alt="6" />
+  <div>
+    <div class="scene w-16 h-16 mx-auto text-center">
+      <div class="cube" :class="{ rolling: isRolling }" :style="transformStyle">
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face1"
+        >
+          <img src="/images/ludo/dice1.svg" alt="1" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face2"
+        >
+          <img src="/images/ludo/dice2.svg" alt="2" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face3"
+        >
+          <img src="/images/ludo/dice3.svg" alt="3" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face4"
+        >
+          <img src="/images/ludo/dice4.svg" alt="4" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face5"
+        >
+          <img src="/images/ludo/dice5.svg" alt="5" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face6"
+        >
+          <img src="/images/ludo/dice6.svg" alt="6" />
+        </div>
       </div>
     </div>
+    <button @click="roll">Click</button>
   </div>
 </template>
 
@@ -76,9 +79,14 @@ const rollDice = (seeks: Dice[], value: Dice) => {
         ludoStore.setDicing(false);
       }, 50);
     }
-  }, 50); // Change face every 1000ms
+  }, 50);
 };
-
+const val = [1, 2, 3, 4, 5, 6] as Dice[];
+let index = 0;
+const roll = () => {
+  rollDice([1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6], 6 as Dice);
+  index = index + 1;
+};
 onMounted(() => {
   ($socket as Socket).on(
     SOCKET_EVENTS.GAME.LUDO.DICE,
@@ -112,7 +120,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   background: white;
-  border: 1px solid #f2f2f2;
+  border: 1px solid #f7f7f7;
   box-sizing: border-box;
 }
 

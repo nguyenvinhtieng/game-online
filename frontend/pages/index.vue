@@ -16,6 +16,8 @@
         <img src="/images/game-thumbnail/ludo.png" alt="Ludo" class="w-20 h-20" />
         <p class="text-lg font-semibold flex-1">Cờ cá ngựa</p>
       </NuxtLink>
+
+      <SpecLudoDiceTest />
     </div>
   </div>
 </template>
