@@ -9,7 +9,7 @@ git fetch
 git pull
 
 # Navigate to the frontend directory, build the project, and start it with PM2
-cd ./frontend
+cd ../frontend
 yarn build
 pm2 start npm --name game-fe -- start
 
