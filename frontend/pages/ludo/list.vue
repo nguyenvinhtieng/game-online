@@ -14,7 +14,7 @@
           <ArrowLeft class="w-6 h-6" />
         </button>
         <img src="/images/game-thumbnail/ludo.png" alt="logo" class="w-14 h-14" />
-        <p class="font-semibold">MEOW LUDO</p>
+        <p class="font-semibold">MEOW Cá ngựa</p>
       </div>
       <!-- Search -->
       <form
