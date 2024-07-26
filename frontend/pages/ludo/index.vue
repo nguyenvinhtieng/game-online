@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center justify-center flex-col gap-5 md:gap-10 h-dvh">
     <img
-      src="/images/game-thumbnail/ludo.svg"
+      src="/images/game-thumbnail/ludo.png"
       alt="Meow Game"
       :class="cn('w-[70%] max-w-80', device.isMobile && 'max-w-40')"
     />

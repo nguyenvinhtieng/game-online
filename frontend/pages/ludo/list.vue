@@ -13,8 +13,8 @@
         >
           <ArrowLeft class="w-6 h-6" />
         </button>
-        <img src="/images/game-thumbnail/ludo.svg" alt="logo" class="w-14 h-14" />
-        <p class="font-semibold">MEOW Cá ngựa</p>
+        <img src="/images/game-thumbnail/ludo.png" alt="logo" class="w-14 h-14" />
+        <p class="font-semibold">Đua Mèo</p>
       </div>
       <!-- Search -->
       <form
