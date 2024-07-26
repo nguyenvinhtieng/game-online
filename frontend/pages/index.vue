@@ -7,14 +7,14 @@
         class="flex items-center justify-center gap-2 transition-all p-3 rounded-lg hover:bg-neutral-100"
       >
         <img src="/images/game-thumbnail/thirteen.svg" alt="Thirteen" class="w-20 h-20" />
-        <p class="text-lg font-semibold flex-1">Tiến lên</p>
+        <p class="text-lg font-semibold flex-1">Meow lên</p>
       </NuxtLink>
       <NuxtLink
         to="/ludo"
         class="flex items-center justify-center gap-2 transition-all p-3 rounded-lg hover:bg-neutral-100"
       >
         <img src="/images/game-thumbnail/ludo.svg" alt="Ludo" class="w-20 h-20" />
-        <p class="text-lg font-semibold flex-1">Cờ cá ngựa</p>
+        <p class="text-lg font-semibold flex-1">Đua Mèo</p>
       </NuxtLink>
       <NuxtLink
         to="/tictactoe"

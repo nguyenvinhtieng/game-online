@@ -14,7 +14,7 @@
           <ArrowLeft class="w-6 h-6" />
         </button>
         <img src="/images/game-thumbnail/thirteen.svg" alt="logo" class="w-14 h-14" />
-        <p class="font-semibold">MEOW LÊN</p>
+        <p class="font-semibold">Meow Lên</p>
       </div>
       <!-- Search -->
       <form
