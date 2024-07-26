@@ -74,9 +74,9 @@ const rollDice = (seeks: Dice[], value: Dice) => {
       isRolling.value = false;
       setTimeout(() => {
         ludoStore.setDicing(false);
-      }, 500);
+      }, 50);
     }
-  }, 500); // Change face every 1000ms
+  }, 50); // Change face every 1000ms
 };
 
 onMounted(() => {
@@ -104,7 +104,7 @@ onMounted(() => {
   position: relative;
   transform-style: preserve-3d;
   transform: rotateX(0deg) rotateY(0deg);
-  transition: transform 0.5s;
+  transition: transform 0.05s;
 }
 
 .face {
