@@ -8,6 +8,9 @@ import { ThirteenGame } from '../types/game.thirteen.type';
 import { GameType } from '../types/game.type';
 import { LudoGame } from '../types/game.ludo.type';
 import handleLudoGame, { getLudoList, ludo_lister_register } from './game/ludo';
+import { TicTacToeGame } from '../types/game.tictactoe.type';
+import { getTictactoeList, tictactoe_list_register, handleTictactoeGame } from './game/tictactoe';
+
 const socketHandler = (io: Server) => {
   io.on('connection', (socket) => {
     socket.on('disconnect', () => {
@@ -48,6 +51,19 @@ const socketHandler = (io: Server) => {
           let ludoList = await getLudoList()
           io.to(ludo_lister_register).emit(SOCKET_EVENTS.GAME.LUDO.LIST, ludoList);
           break;
+        case 'tictactoe':
+          const roomTictactoe: TicTacToeGame = {
+            id: roomId,
+            players: [],
+            status: 'waiting',
+            host: socket.id,
+            winnerRoute: [],
+            moves: [],
+          }
+          await redisClient.set(redisRoomDetailKey, JSON.stringify(roomTictactoe));
+          let tictactoeList = await getTictactoeList()
+          io.to(tictactoe_list_register).emit(SOCKET_EVENTS.GAME.TICTACTOE.LIST, tictactoeList);
+          break;
         default:
           console.log('Creating a default game');
           break;
@@ -60,7 +76,7 @@ const socketHandler = (io: Server) => {
 
     handleThirteenGame(socket, io);
     handleLudoGame(socket, io);
-
+    handleTictactoeGame(socket, io);
 
   });
 };
@@ -76,5 +92,7 @@ async function generateRoomId(type: GameType): Promise<string> {
   await redisClient.set(redisKey.list, JSON.stringify(rooms));
   return newId;
 }
+
+
 
 export default socketHandler;

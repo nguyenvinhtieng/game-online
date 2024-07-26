@@ -64,3 +64,24 @@ body {
     scale: 1;
   }
 }
+
+.pulse-red {
+  @apply bg-red-500;
+  animation: pulse 1s infinite;
+}
+.pulse-blue {
+  @apply bg-blue-500;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.2;
+  }
+
+}

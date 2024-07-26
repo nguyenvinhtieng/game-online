@@ -29,6 +29,7 @@
     "webstomp-client": "^1.2.6"
   },
   "devDependencies": {
+    "@pinia-plugin-persistedstate/nuxt": "^1.2.1",
     "@types/canvas-confetti": "^1.6.4",
     "@types/lodash": "^4.17.7",
     "@types/socket.io-client": "^3.0.0",

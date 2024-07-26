@@ -16,6 +16,13 @@
         <img src="/images/game-thumbnail/ludo.png" alt="Ludo" class="w-20 h-20" />
         <p class="text-lg font-semibold flex-1">Cờ cá ngựa</p>
       </NuxtLink>
+      <NuxtLink
+        to="/tictactoe"
+        class="flex items-center justify-center gap-2 transition-all p-3 rounded-lg hover:bg-neutral-100"
+      >
+        <img src="/images/game-thumbnail/tictactoe.png" alt="Ludo" class="w-20 h-20" />
+        <p class="text-lg font-semibold flex-1">TicTacToe</p>
+      </NuxtLink>
     </div>
   </div>
 </template>

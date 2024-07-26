@@ -272,7 +272,7 @@ onUnmounted(() => {
 
 
 definePageMeta({
-  layout: "default",
+  layout: "horizontal",
   scrollToTop: true,
 });
 </script>

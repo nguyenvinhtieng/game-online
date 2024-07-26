@@ -1,1 +1,1 @@
-export type GameType = 'thirteen' | 'ludo'
+export type GameType = 'thirteen' | 'ludo' | 'tictactoe'

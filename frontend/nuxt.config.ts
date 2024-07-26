@@ -48,6 +48,7 @@ export default defineNuxtConfig({
   },
   modules: [
     "@pinia/nuxt",
+    '@pinia-plugin-persistedstate/nuxt',
     '@nuxtjs/device',
     [
       "@nuxtjs/google-fonts",

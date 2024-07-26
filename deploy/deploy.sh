@@ -10,11 +10,13 @@ git pull
 
 # Navigate to the frontend directory, build the project, and start it with PM2
 cd ../frontend
+yarn install
 yarn build
 pm2 start npm --name game-fe -- start
 
 # Navigate to the backend directory, build the project, and start it with PM2
 cd ../backend
+yarn install
 yarn build
 pm2 start npm --name game-api -- start
 
