@@ -12,8 +12,8 @@ export const ludo_lister_register = "ludo_lister_register";
 const handleLudoGame = (socket: Socket, io: Server) => {
     const timersStartGame: Record<string, NodeJS.Timeout> = {}
     const TIME_PREPARE_START_GAME = 5;
-    const ROLLING_TIME = 5;
     const FINISH_TIME = 5
+    const ROLLING_TIME = 100;
     socket.on("disconnect", async () => {
         socket.leave(ludo_lister_register);
         const redisKey = generateRedisKey("ludo")
@@ -383,7 +383,7 @@ const handleLudoGame = (socket: Socket, io: Server) => {
                     turn: room.turn,
                     dice: room.dice || null,
                 });
-            }, (seeks.length + 2) * 50)
+            }, (seeks.length + 2) * ROLLING_TIME)
         } else if (chesses.length == 0 && dice == 6) { // quay tiep
         } else {
             io.to(turn).emit(SOCKET_EVENTS.GAME.LUDO.MOVABLE_CHESS, {
