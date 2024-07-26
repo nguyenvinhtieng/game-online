@@ -4,7 +4,8 @@
       cn(
         'border border-neutral-100 bg-white cursor-not-allowed',
         !type && status == 'playing' && 'hover:bg-blue-100 cursor-pointer',
-        winCell
+        winCell,
+        cellOpacity
       )
     "
     @click="handleClick"
@@ -55,6 +56,16 @@ const winCell = computed(()=> {
   if(!isWinCell) return '';
   return players.value.find((p: Player) => p.id === winner?.value)?.position === PlayerTypeEnum.X ? 'pulse-red' : 'pulse-blue';
 })
+
+
+const cellOpacity = computed(() => {
+  const mov = moves.value.find((m: TicTacToeMove) => m.position === props.position);
+  if (!mov) return 'opacity-100';
+  const allMoves = moves.value.filter((m: TicTacToeMove) => m.id === mov.id);
+  if(allMoves.length < 3) return 'opacity-100';
+  if(allMoves[0].position == mov.position) return 'opacity-30';
+  return 'opacity-100';
+});
 </script>
 
 <style scoped lang="scss"></style>

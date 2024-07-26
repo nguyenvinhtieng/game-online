@@ -256,7 +256,7 @@ export const handleTictactoeGame = (socket: Socket, io: Server) => {
                 });
                 return;
             }
-            if(room.moves.length > 6) {
+            if(room.moves.length > 5) {
                 room.moves.shift()
             }
             room.moves.push({
