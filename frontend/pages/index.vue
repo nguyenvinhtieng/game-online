@@ -1,32 +1,16 @@
 <template>
   <div>
-    <h1 class="pt-10 text-lg font-semibold text-center">Các trò chơi đang hoạt động</h1>
-    <div class="w-full max-w-[300px] mx-auto flex flex-col gap-3 mt-10">
-      <NuxtLink
-        to="/thirteen"
-        class="flex items-center justify-center gap-2 transition-all p-3 rounded-lg hover:bg-neutral-100"
-      >
-        <img src="/images/game-thumbnail/thirteen.png" alt="Thirteen" class="w-20 h-20" />
-        <p class="text-lg font-semibold flex-1">Meow Lên</p>
-      </NuxtLink>
-      <NuxtLink
-        to="/ludo"
-        class="flex items-center justify-center gap-2 transition-all p-3 rounded-lg hover:bg-neutral-100"
-      >
-        <img src="/images/game-thumbnail/ludo.png" alt="Ludo" class="w-20 h-20" />
-        <p class="text-lg font-semibold flex-1">Đua Mèo</p>
-      </NuxtLink>
-      <NuxtLink
-        to="/tictactoe"
-        class="flex items-center justify-center gap-2 transition-all p-3 rounded-lg hover:bg-neutral-100"
-      >
-        <img src="/images/game-thumbnail/tictactoe.png" alt="Ludo" class="w-20 h-20" />
-        <p class="text-lg font-semibold flex-1">TicTacToe</p>
-      </NuxtLink>
+    <h1 class="pt-10 text-lg text-center opacity-50">Các trò chơi đang hoạt động</h1>
+    <div
+      class="w-full md:flex md:items-stretch md:justify-center gap-5 mt-10 grid grid-cols-2"
+    >
+      <SpecGameItem v-for="game in GAMES" :game="game" :key="game.link" />
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import { GAMES } from "~/constants";
+
 definePageMeta({
   layout: "default",
   scrollToTop: true,

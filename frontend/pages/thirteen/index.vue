@@ -15,11 +15,12 @@
       <template v-slot:startIcon> <PlayIcon :size="16" fill="currentColor" /> </template>
       <template v-slot:child> Bắt đầu chơi </template>
     </BaseButton>
-    <p
+    <NuxtLink
+      to="/"
       class="text-primary md:text-sm text-xs cursor-pointer font-semibold flex gap-2 items-center"
     >
-      <CircleHelp class="md:w-4 md:h-4 w-3 h-3" /><span>Cách chơi</span>
-    </p>
+      <span>Trang chủ</span>
+    </NuxtLink>
   </div>
 </template>
 <script setup lang="ts">

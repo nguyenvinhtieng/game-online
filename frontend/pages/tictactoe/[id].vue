@@ -3,7 +3,7 @@
     <SpecTictactoeHeader />
     <!-- Ready button -->
     <SpecTictactoeReadyButton />
-    <div v-if="status == 'playing'">
+    <div v-if="status == 'playing'" class="md:block hidden">
       <CircleIcon
         :width="40"
         :height="40"
@@ -12,10 +12,12 @@
       />
       <XIcon :width="40" :height="40" class="text-red-500" v-else />
     </div>
-    <div class="flex-1 overflow-hidden flex items-center justify-center gap-5 md:gap-10">
+    <div
+      class="flex-1 w-full overflow-hidden flex flex-col md:flex-row items-center justify-center gap-5 md:gap-10"
+    >
       <SpecTictactoePlayer :player="playersSorted[0]" />
       <div
-        class="md:h-[80%] w-full max-w-[800px] md:w-fit aspect-square grid grid-cols-3 grid-rows-3 relative"
+        class="md:h-[80%] h-fit w-full max-w-[800px] md:w-fit aspect-square grid grid-cols-3 grid-rows-3 relative"
       >
         <SpecTictactoeCell v-for="i in cell" :key="i" :position="i" />
       </div>

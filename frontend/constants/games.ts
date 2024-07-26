@@ -1,9 +1,8 @@
-export type GAMES_TYPE = 'thirteen';
+export type GAMES_TYPE = 'thirteen' | 'ludo' | 'tictactoe';
 
-interface GameItem {
+export type GameItem = {
     thumbnail: string;
     name: string;
-    description?: string;
     link: string;
     type: GAMES_TYPE;
 }
@@ -11,10 +10,21 @@ interface GameItem {
 
 export const GAMES: GameItem[] = [
     {
-        thumbnail: '/images/game-thumbnail/tien-len.png',
-        name: 'Bài Tiến lên',
-        description: 'Chơi bài tiến lên miền nam',
-        link: '/game/thirteen',
+        thumbnail: '/images/game-thumbnail/thirteen.png',
+        name: 'Meow Lên',
+        link: '/thirteen',
         type: 'thirteen'
+    },
+    {
+        thumbnail: '/images/game-thumbnail/ludo.png',
+        name: 'Đua mèo',
+        link: '/ludo',
+        type: 'ludo'
+    },
+    {
+        thumbnail: '/images/game-thumbnail/tictactoe.png',
+        name: 'Ít Ô',
+        link: '/tictactoe',
+        type: 'tictactoe'
     }
 ];

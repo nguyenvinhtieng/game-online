@@ -13,7 +13,7 @@
           <ArrowLeft class="w-6 h-6" />
         </button>
         <img src="/images/game-thumbnail/tictactoe.png" alt="logo" class="w-14 h-14" />
-        <p class="font-semibold">Tictactoe</p>
+        <p class="font-semibold">Ít Ô</p>
       </div>
       <!-- Search -->
       <form
