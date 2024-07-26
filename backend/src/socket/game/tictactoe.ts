@@ -256,6 +256,9 @@ export const handleTictactoeGame = (socket: Socket, io: Server) => {
                 });
                 return;
             }
+            if(room.moves.length > 6) {
+                room.moves.shift()
+            }
             room.moves.push({
                 id: socket.id,
                 position
@@ -285,9 +288,6 @@ export const handleTictactoeGame = (socket: Socket, io: Server) => {
                     }, FINISH_TIME * 1000);
                 }, FINISH_TIME * 1000);
             } else {
-                if(room.moves.length > 6) {
-                    room.moves.shift()
-                }
                 room.turn = room.players.find(player => player.id != socket.id)?.id
             }
             await redisClient.set(redisKeys.detail, JSON.stringify(room));
