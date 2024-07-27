@@ -9,7 +9,7 @@ export const tictactoe_list_register = "tictactoe_list_register";
 const timersStartGame: Record<string, NodeJS.Timeout> = {}
 export const handleTictactoeGame = (socket: Socket, io: Server) => {
     const TIME_PREPARE_START_GAME = 5;
-    const FINISH_TIME = 5
+    const FINISH_TIME = 1.5;
     socket.on("disconnect", async () => {
         socket.leave(tictactoe_list_register);
         const redisKey = generateRedisKey("tictactoe")
