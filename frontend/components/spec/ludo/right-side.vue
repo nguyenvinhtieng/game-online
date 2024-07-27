@@ -5,7 +5,9 @@
     <div
       class="flex-1 flex md:flex-col flex-row justify-center items-center md:gap-8 gap-2 flex-wrap"
     >
-      <div class="w-full flex flex-col gap-1">
+      <div
+        :class="cn('w-full flex flex-col gap-1', status != 'waiting' && 'md:flex hidden')"
+      >
         <p class="font-semibold text-black/50 text-center">ID: #{{ id }}</p>
         <p v-if="status == 'waiting'" class="text-sm mb-3">
           Hãy chọn vào màu yêu thích của bạn bằng cách nhấn chọn trên bàn cờ
