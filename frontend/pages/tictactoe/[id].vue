@@ -3,7 +3,10 @@
     <SpecTictactoeHeader />
     <!-- Ready button -->
     <SpecTictactoeReadyButton />
-    <div v-if="status == 'playing'" class="md:block hidden">
+    <div
+      v-if="status == 'playing'"
+      class="md:block md:relative md:top-0 md:right-0 fixed top-4 right-1"
+    >
       <CircleIcon
         :width="40"
         :height="40"

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-2 items-center justify-center w-[200px]">
+  <div class="flex md:flex-col flex-row gap-2 items-center justify-center w-[200px]">
     <template v-if="props.player">
       <CircleIcon
         :width="40"
@@ -13,7 +13,7 @@
         class="text-red-500"
         v-else-if="props.player.position == PlayerTypeEnum.X"
       />
-      <div class="text-center flex gap-1 items-center justify-center">
+      <div class="text-center flex gap-1 items-center justify-center whitespace-nowrap">
         <span
           class="text-2xl font-semibold text-primary"
           :contenteditable="isChangeName"
@@ -38,7 +38,7 @@
           </div>
         </template>
       </div>
-      <p>
+      <p class="flex gap-1">
         Điểm: <span class="font-semibold">{{ props.player.score }}</span>
       </p>
     </template>
