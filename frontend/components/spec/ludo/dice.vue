@@ -1,35 +1,37 @@
 <template>
-  <div class="scene w-16 h-16 mx-auto text-center">
-    <div class="cube" :class="{ rolling: isRolling }" :style="transformStyle">
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face1"
-      >
-        <img src="/images/ludo/dice1.svg" alt="1" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face2"
-      >
-        <img src="/images/ludo/dice2.svg" alt="2" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face3"
-      >
-        <img src="/images/ludo/dice3.svg" alt="3" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face4"
-      >
-        <img src="/images/ludo/dice4.svg" alt="4" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face5"
-      >
-        <img src="/images/ludo/dice5.svg" alt="5" />
-      </div>
-      <div
-        class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face6"
-      >
-        <img src="/images/ludo/dice6.svg" alt="6" />
+  <div class="w-full mt-5">
+    <div class="scene w-16 h-16 mx-auto text-center">
+      <div class="cube" :class="{ rolling: isRolling }" :style="transformStyle">
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face1"
+        >
+          <img src="/images/ludo/dice1.svg" alt="1" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face2"
+        >
+          <img src="/images/ludo/dice2.svg" alt="2" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face3"
+        >
+          <img src="/images/ludo/dice3.svg" alt="3" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face4"
+        >
+          <img src="/images/ludo/dice4.svg" alt="4" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face5"
+        >
+          <img src="/images/ludo/dice5.svg" alt="5" />
+        </div>
+        <div
+          class="flex items-center justify-center text-lg w-full h-full overflow-hidden face face6"
+        >
+          <img src="/images/ludo/dice6.svg" alt="6" />
+        </div>
       </div>
     </div>
   </div>

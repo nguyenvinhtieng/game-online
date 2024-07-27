@@ -8,11 +8,11 @@ import shuffleArray from '../../utils/shuffle-array';
 import { suitOrder } from '../../constants/cards';
 import jwt from 'jsonwebtoken';
 const jwtKey = process.env.JWT_SECRET || 'jwt-key';
+const timers: Record<string, NodeJS.Timeout> = {}
+const timersTurn: Record<string, NodeJS.Timeout> = {}
 const handleThirteenGame = (socket: Socket, io: Server) => {
-    const timers: Record<string, NodeJS.Timeout> = {}
-    const timersTurn: Record<string, NodeJS.Timeout> = {}
     const TIME_PREPARE_START_GAME = 5
-    const TIME_TURN = 5
+    const TIME_TURN = 30
     socket.on('disconnect', async () => {
         // Get list of room
         const redisKey = generateRedisKey('thirteen')
@@ -286,7 +286,6 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
             return;
         }
         if (timersTurn[redisKeys.detail]) {
-            console.log('CLEAR: post for', room.players[myIndex].name)
             clearTimeout(timersTurn[redisKeys.detail])
             delete timersTurn[redisKeys.detail]
         }
@@ -375,14 +374,13 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
 
 
         // Change turn to user have next position on list players
-        // const time = new Date();
-        // time.setSeconds(time.getSeconds() + TIME_TURN);
-        // room.turnTimeout = time
-        // timersTurn[redisKeys.detail] = setTimeout(async () => {
-        //     console.log('RUN: post for', room.players[myIndex].name)
-        //     await nextTurn(payload.roomId)
-        // }, TIME_TURN * 1000)
-        room.turnTimeout = undefined
+        const time = new Date();
+        time.setSeconds(time.getSeconds() + TIME_TURN);
+        room.turnTimeout = time
+        timersTurn[redisKeys.detail] = setTimeout(async () => {
+            await nextTurn(payload.roomId)
+        }, TIME_TURN * 1000)
+        // room.turnTimeout = undefined
 
         io.in(redisKeys.detail).emit(SOCKET_EVENTS.GAME.THIRTEEN.DATA, {
             prevTurn: room.prevTurn,
@@ -488,19 +486,18 @@ const handleThirteenGame = (socket: Socket, io: Server) => {
         const nextPlayer = room.players.find(player => player.position == nextPosition)
         room.turn = nextPlayer?.id
 
-        // if (room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
-        //     const time = new Date();
-        //     time.setSeconds(time.getSeconds() + TIME_TURN);
-        //     room.turnTimeout = time
-        //     timersTurn[redisKeys.detail] = setTimeout(async () => {
-        //         console.log('RUN: next for', room.players[myIndex].name)
-        //         clearTimeout(timersTurn[redisKeys.detail])
-        //         delete timersTurn[redisKeys.detail]
-        //         await nextTurn(roomId)
-        //     }, TIME_TURN * 1000)
-        // } else {
-        //     room.turnTimeout = undefined
-        // }
+        if (room.prevTurn[room.prevTurn.length - 1]?.id != nextPlayer?.id) {
+            const time = new Date();
+            time.setSeconds(time.getSeconds() + TIME_TURN);
+            room.turnTimeout = time
+            timersTurn[redisKeys.detail] = setTimeout(async () => {
+                clearTimeout(timersTurn[redisKeys.detail])
+                delete timersTurn[redisKeys.detail]
+                await nextTurn(roomId)
+            }, TIME_TURN * 1000)
+        } else {
+            room.turnTimeout = undefined
+        }
         room.turnTimeout = undefined
 
         await redisClient.set(redisKeys.detail, JSON.stringify(room));

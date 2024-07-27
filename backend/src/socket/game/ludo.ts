@@ -9,8 +9,8 @@ import { color_to_position, ludo_routes, position_to_color } from "../../constan
 import getRandomInt from "../../utils/get-random-int";
 const jwtKey = process.env.JWT_SECRET || "jwt-key";
 export const ludo_lister_register = "ludo_lister_register";
+const timersStartGame: Record<string, NodeJS.Timeout> = {}
 const handleLudoGame = (socket: Socket, io: Server) => {
-    const timersStartGame: Record<string, NodeJS.Timeout> = {}
     const TIME_PREPARE_START_GAME = 5;
     const FINISH_TIME = 5
     const ROLLING_TIME = 100;

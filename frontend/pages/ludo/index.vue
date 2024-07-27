@@ -3,7 +3,7 @@
     <img
       src="/images/game-thumbnail/ludo.png"
       alt="Meow Game"
-      :class="cn('w-[70%] max-w-80', device.isMobile && 'max-w-40')"
+      :class="cn('w-[90%] max-w-80')"
     />
     <BaseButton
       variant="outline"
@@ -26,7 +26,6 @@
 <script setup lang="ts">
 import { PlayIcon, CircleHelp } from "lucide-vue-next";
 const { $router } = useNuxtApp();
-const device = useDevice();
 
 const handleClick = () => {
   $router.push("/ludo/list");

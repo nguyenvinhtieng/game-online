@@ -6,9 +6,8 @@ import jwt from "jsonwebtoken";
 import { Player, PlayerType, PlayerTypeEnum, TicTacToeGame, TicTacToeMove, TicTacToePosition, UserStatus } from "../../types/game.tictactoe.type";
 const jwtKey = process.env.JWT_SECRET || "jwt-key";
 export const tictactoe_list_register = "tictactoe_list_register";
-
+const timersStartGame: Record<string, NodeJS.Timeout> = {}
 export const handleTictactoeGame = (socket: Socket, io: Server) => {
-    const timersStartGame: Record<string, NodeJS.Timeout> = {}
     const TIME_PREPARE_START_GAME = 5;
     const FINISH_TIME = 5
     socket.on("disconnect", async () => {

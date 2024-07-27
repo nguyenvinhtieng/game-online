@@ -3,7 +3,7 @@
     :class="
       cn(
         'border border-neutral-100 bg-white cursor-not-allowed',
-        !type && status == 'playing' && 'hover:bg-blue-100 cursor-pointer',
+        !type && status == 'playing' && 'md:hover:bg-blue-100 cursor-pointer',
         winCell,
         cellOpacity
       )

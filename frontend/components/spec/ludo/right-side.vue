@@ -1,12 +1,12 @@
 <template>
-  <div class="flex flex-col justify-center items-center w-full h-full p-10">
-    <div>
-      <p class="font-semibold text-black/50 text-center">ID: #{{ id }}</p>
-      <!-- <p class="mt-2 font-semibold text-black/50 text-center">Thời lượng trận đấu</p>
-      <h2 class="mt-2 font-semibold text-4xl text-black/50 text-center">15:00:00</h2> -->
-    </div>
-    <div class="flex-1 flex flex-col justify-center items-center gap-8">
+  <div
+    class="flex flex-col justify-center items-center w-full h-full md:p-10 p-0 mt-5 md:mt-0"
+  >
+    <div
+      class="flex-1 flex md:flex-col flex-row justify-center items-center md:gap-8 gap-2 flex-wrap"
+    >
       <div class="w-full flex flex-col gap-1">
+        <p class="font-semibold text-black/50 text-center">ID: #{{ id }}</p>
         <p v-if="status == 'waiting'" class="text-sm mb-3">
           Hãy chọn vào màu yêu thích của bạn bằng cách nhấn chọn trên bàn cờ
         </p>

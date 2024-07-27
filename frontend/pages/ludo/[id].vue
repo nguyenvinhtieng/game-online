@@ -1,7 +1,9 @@
 <template>
-  <div class="w-full h-dvh flex items-center justify-center gap-10">
+  <div class="w-full h-dvh md:flex md:flex-row items-center justify-center gap-10">
     <!-- Board -->
-    <div class="ludo-board aspect-square h-[85%] grid grid-cols-11 grid-rows-11 gap-3">
+    <div
+      class="ludo-board md:mt-0 mt-10 aspect-square md:h-[85%] w-full h-fit md:w-fit grid grid-cols-11 grid-rows-11 md:gap-3 gap-1"
+    >
       <SpecLudoCell v-for="route in ludo_routes" :key="route.index" :data="route" />
       <SpecLudoCellDestination
         v-for="route in ludo_destination"
@@ -20,7 +22,7 @@
 
       <SpecLudoCup />
     </div>
-    <div class="w-[400px] h-full">
+    <div class="md:w-[400px] md:h-full">
       <SpecLudoRightSide />
     </div>
   </div>
