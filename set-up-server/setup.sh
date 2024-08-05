@@ -4,7 +4,7 @@ sudo apt-get update
 sudo apt-get install -y git
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 source ~/.bashrc
-nvm install 21
+nvm install 22
 npm install -g yarn
 npm install -g pm2
 
